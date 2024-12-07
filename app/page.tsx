@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Slider } from "@/components/ui/slider"
-import { Settings2 } from "lucide-react"
+import { Settings2, LayoutListIcon as LayoutSideBySide, LayoutGridIcon as LayoutVertical, RotateCcw, Maximize2 } from 'lucide-react'
 import { useAudioProcessing } from './hooks/useAudioProcessing'
 import { VolumeGauge } from './components/VolumeGauge'
+
+type LayoutMode = 'side-by-side' | 'vertical' | 'inverse' | 'translation-only';
 
 export default function SimultaneousInterpretationSystem() {
   const [targetLanguage, setTargetLanguage] = useState('en')
@@ -15,6 +17,7 @@ export default function SimultaneousInterpretationSystem() {
   const [updateInterval, setUpdateInterval] = useState(100)
   const [voiceThreshold, setVoiceThreshold] = useState(0.1)
   const [showOptions, setShowOptions] = useState(false)
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>('side-by-side')
   const japaneseMessagesEndRef = useRef<HTMLDivElement>(null)
   const translatedMessagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -50,6 +53,43 @@ export default function SimultaneousInterpretationSystem() {
 
   const transcriptMessages = useMemo(() => messages.filter(m => m.type === 'transcript' && m.isFinal), [messages]);
   const translationMessages = useMemo(() => messages.filter(m => m.type === 'translation'), [messages]);
+
+  const renderLayoutButtons = () => (
+    <div className="flex gap-2">
+      <Button
+        variant={layoutMode === 'side-by-side' ? 'default' : 'outline'}
+        size="icon"
+        onClick={() => setLayoutMode('side-by-side')}
+        title="左右表示"
+      >
+        <LayoutSideBySide className="h-4 w-4" />
+      </Button>
+      <Button
+        variant={layoutMode === 'vertical' ? 'default' : 'outline'}
+        size="icon"
+        onClick={() => setLayoutMode('vertical')}
+        title="縦表示"
+      >
+        <LayoutVertical className="h-4 w-4" />
+      </Button>
+      <Button
+        variant={layoutMode === 'inverse' ? 'default' : 'outline'}
+        size="icon"
+        onClick={() => setLayoutMode('inverse')}
+        title="翻訳言語反転表示"
+      >
+        <RotateCcw className="h-4 w-4" />
+      </Button>
+      <Button
+        variant={layoutMode === 'translation-only' ? 'default' : 'outline'}
+        size="icon"
+        onClick={() => setLayoutMode('translation-only')}
+        title="翻訳のみ表示"
+      >
+        <Maximize2 className="h-4 w-4" />
+      </Button>
+    </div>
+  );
 
   const getLanguageDisplay = (langCode: string): string => {
     switch (langCode) {
@@ -138,100 +178,104 @@ export default function SimultaneousInterpretationSystem() {
       case 'ha': return 'ハウサ語';
       case 'ig': return 'イボ語';
       case 'yo': return 'ヨルバ語';
-      case 'mg': return 'マダガスカル語';
+
+      // 国際補助言語
+      case 'eo': return 'エスペラント語';
 
       default: return 'その他';
     }
-  };
-  return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-8">同時通訳システム</h1>
-        
-        <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <Button 
-              onClick={toggleListening}
-              variant={isListening ? "destructive" : "default"}
-            >
-              {isListening ? '停止' : '開始'}
-            </Button>
-            <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-              <SelectTrigger>
-                <SelectValue placeholder="言語を選択" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="en">英語</SelectItem>
-                <SelectItem value="zh">中国語（簡体字）</SelectItem>
-                <SelectItem value="zh-HK">広東語（繁体字）</SelectItem>
-                <SelectItem value="zh-TW">台湾中国語（繁体字）</SelectItem>
-                <SelectItem value="ko">韓国語</SelectItem>
-                <SelectItem value="mo">モンゴル語</SelectItem>
-                <SelectItem value="vi">ベトナム語</SelectItem>
-                <SelectItem value="th">タイ語</SelectItem>
-                <SelectItem value="ms">マレー語</SelectItem>
-                <SelectItem value="id">インドネシア語</SelectItem>
-                <SelectItem value="fil">フィリピン語</SelectItem>
-                <SelectItem value="my">ミャンマー語</SelectItem>
-                <SelectItem value="km">クメール語</SelectItem>
-                <SelectItem value="lo">ラオ語</SelectItem>
-                <SelectItem value="tl">タガログ語</SelectItem>
-                <SelectItem value="hi">ヒンディー語</SelectItem>
-                <SelectItem value="bn">ベンガル語</SelectItem>
-                <SelectItem value="ur">ウルドゥー語</SelectItem>
-                <SelectItem value="ta">タミル語</SelectItem>
-                <SelectItem value="te">テルグ語</SelectItem>
-                <SelectItem value="mr">マラーティー語</SelectItem>
-                <SelectItem value="gu">グジャラーティー語</SelectItem>
-                <SelectItem value="kn">カンナダ語</SelectItem>
-                <SelectItem value="ml">マラヤーラム語</SelectItem>
-                <SelectItem value="pa">パンジャーブ語</SelectItem>
-                <SelectItem value="or">オリヤー語</SelectItem>
-                <SelectItem value="si">シンハラ語</SelectItem>
-                <SelectItem value="fr">フランス語</SelectItem>
-                <SelectItem value="de">ドイツ語</SelectItem>
-                <SelectItem value="es">スペイン語</SelectItem>
-                <SelectItem value="it">イタリア語</SelectItem>
-                <SelectItem value="pt">ポルトガル語</SelectItem>
-                <SelectItem value="nl">オランダ語</SelectItem>
-                <SelectItem value="sv">スウェーデン語</SelectItem>
-                <SelectItem value="da">デンマーク語</SelectItem>
-                <SelectItem value="no">ノルウェー語</SelectItem>
-                <SelectItem value="fi">フィンランド語</SelectItem>
-                <SelectItem value="is">アイスランド語</SelectItem>
-                <SelectItem value="ru">ロシア語</SelectItem>
-                <SelectItem value="pl">ポーランド語</SelectItem>
-                <SelectItem value="uk">ウクライナ語</SelectItem>
-                <SelectItem value="cs">チェコ語</SelectItem>
-                <SelectItem value="hu">ハンガリー語</SelectItem>
-                <SelectItem value="ro">ルーマニア語</SelectItem>
-                <SelectItem value="bg">ブルガリア語</SelectItem>
-                <SelectItem value="sk">スロバキア語</SelectItem>
-                <SelectItem value="hr">クロアチア語</SelectItem>
-                <SelectItem value="sr">セルビア語</SelectItem>
-                <SelectItem value="sl">スロベニア語</SelectItem>
-                <SelectItem value="lt">リトアニア語</SelectItem>
-                <SelectItem value="lv">ラトビア語</SelectItem>
-                <SelectItem value="et">エストニア語</SelectItem>
-                <SelectItem value="el">ギリシャ語</SelectItem>
-                <SelectItem value="tr">トルコ語</SelectItem>
-                <SelectItem value="ka">グルジア語</SelectItem>
-                <SelectItem value="ar">アラビア語</SelectItem>
-                <SelectItem value="he">ヘブライ語</SelectItem>
-                <SelectItem value="fa">ペルシャ語</SelectItem>
-                <SelectItem value="ku">クルド語</SelectItem>
-                <SelectItem value="am">アムハラ語</SelectItem>
-                <SelectItem value="yi">イディッシュ語</SelectItem>
-                <SelectItem value="sw">スワヒリ語</SelectItem>
-                <SelectItem value="zu">ズールー語</SelectItem>
-                <SelectItem value="xh">コーサ語</SelectItem>
-                <SelectItem value="ny">チェワ語</SelectItem>
-                <SelectItem value="ha">ハウサ語</SelectItem>
-                <SelectItem value="ig">イボ語</SelectItem>
-                <SelectItem value="yo">ヨルバ語</SelectItem>
-                <SelectItem value="mg">マダガスカル語</SelectItem>
-              </SelectContent>
+};
+
+return (
+  <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="max-w-6xl mx-auto">
+      <h1 className="text-3xl font-bold text-center mb-8">EarthSync</h1>
+      
+      <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <Button 
+            onClick={toggleListening}
+            variant={isListening ? "destructive" : "default"}
+          >
+            {isListening ? '停止' : '開始'}
+          </Button>
+          <Select value={targetLanguage} onValueChange={setTargetLanguage}>
+            <SelectTrigger>
+              <SelectValue placeholder="言語を選択" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="en">英語</SelectItem>
+              <SelectItem value="zh">中国語（簡体字）</SelectItem>
+              <SelectItem value="zh-HK">広東語（繁体字）</SelectItem>
+              <SelectItem value="zh-TW">台湾中国語（繁体字）</SelectItem>
+              <SelectItem value="ko">韓国語</SelectItem>
+              <SelectItem value="mo">モンゴル語</SelectItem>
+              <SelectItem value="vi">ベトナム語</SelectItem>
+              <SelectItem value="th">タイ語</SelectItem>
+              <SelectItem value="ms">マレー語</SelectItem>
+              <SelectItem value="id">インドネシア語</SelectItem>
+              <SelectItem value="fil">フィリピン語</SelectItem>
+              <SelectItem value="my">ミャンマー語</SelectItem>
+              <SelectItem value="km">クメール語</SelectItem>
+              <SelectItem value="lo">ラオ語</SelectItem>
+              <SelectItem value="tl">タガログ語</SelectItem>
+              <SelectItem value="hi">ヒンディー語</SelectItem>
+              <SelectItem value="bn">ベンガル語</SelectItem>
+              <SelectItem value="ur">ウルドゥー語</SelectItem>
+              <SelectItem value="ta">タミル語</SelectItem>
+              <SelectItem value="te">テルグ語</SelectItem>
+              <SelectItem value="mr">マラーティー語</SelectItem>
+              <SelectItem value="gu">グジャラーティー語</SelectItem>
+              <SelectItem value="kn">カンナダ語</SelectItem>
+              <SelectItem value="ml">マラヤーラム語</SelectItem>
+              <SelectItem value="pa">パンジャーブ語</SelectItem>
+              <SelectItem value="or">オリヤー語</SelectItem>
+              <SelectItem value="si">シンハラ語</SelectItem>
+              <SelectItem value="fr">フランス語</SelectItem>
+              <SelectItem value="de">ドイツ語</SelectItem>
+              <SelectItem value="es">スペイン語</SelectItem>
+              <SelectItem value="it">イタリア語</SelectItem>
+              <SelectItem value="pt">ポルトガル語</SelectItem>
+              <SelectItem value="nl">オランダ語</SelectItem>
+              <SelectItem value="sv">スウェーデン語</SelectItem>
+              <SelectItem value="da">デンマーク語</SelectItem>
+              <SelectItem value="no">ノルウェー語</SelectItem>
+              <SelectItem value="fi">フィンランド語</SelectItem>
+              <SelectItem value="is">アイスランド語</SelectItem>
+              <SelectItem value="ru">ロシア語</SelectItem>
+              <SelectItem value="pl">ポーランド語</SelectItem>
+              <SelectItem value="uk">ウクライナ語</SelectItem>
+              <SelectItem value="cs">チェコ語</SelectItem>
+              <SelectItem value="hu">ハンガリー語</SelectItem>
+              <SelectItem value="ro">ルーマニア語</SelectItem>
+              <SelectItem value="bg">ブルガリア語</SelectItem>
+              <SelectItem value="sk">スロバキア語</SelectItem>
+              <SelectItem value="hr">クロアチア語</SelectItem>
+              <SelectItem value="sr">セルビア語</SelectItem>
+              <SelectItem value="sl">スロベニア語</SelectItem>
+              <SelectItem value="lt">リトアニア語</SelectItem>
+              <SelectItem value="lv">ラトビア語</SelectItem>
+              <SelectItem value="et">エストニア語</SelectItem>
+              <SelectItem value="el">ギリシャ語</SelectItem>
+              <SelectItem value="tr">トルコ語</SelectItem>
+              <SelectItem value="ka">グルジア語</SelectItem>
+              <SelectItem value="ar">アラビア語</SelectItem>
+              <SelectItem value="he">ヘブライ語</SelectItem>
+              <SelectItem value="fa">ペルシャ語</SelectItem>
+              <SelectItem value="ku">クルド語</SelectItem>
+              <SelectItem value="am">アムハラ語</SelectItem>
+              <SelectItem value="yi">イディッシュ語</SelectItem>
+              <SelectItem value="sw">スワヒリ語</SelectItem>
+              <SelectItem value="zu">ズールー語</SelectItem>
+              <SelectItem value="xh">コーサ語</SelectItem>
+              <SelectItem value="ny">チェワ語</SelectItem>
+              <SelectItem value="ha">ハウサ語</SelectItem>
+              <SelectItem value="ig">イボ語</SelectItem>
+              <SelectItem value="yo">ヨルバ語</SelectItem>
+              <SelectItem value="eo">エスペラント語</SelectItem>
+            </SelectContent>
             </Select>
+            {renderLayoutButtons()}
             <Button
               variant="outline"
               size="icon"
@@ -304,29 +348,36 @@ export default function SimultaneousInterpretationSystem() {
           )}
         </div>
         
-        <div className="flex space-x-4">
-          <div className="w-1/2 bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4">日本語</h2>
+        {layoutMode === 'vertical' ? (
+          <div className="bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
+            <h2 className="text-xl font-semibold mb-4">メッセージ</h2>
             <div className="space-y-4">
-              {transcriptMessages.map((message) => (
-                <div key={message.timestamp} className="p-3 rounded-lg bg-green-100">
-                  <p>{message.content}</p>
+              {transcriptMessages.map((message, index) => (
+                <div key={`message-${message.timestamp}`} className="space-y-2">
+                  <div className="p-3 rounded-lg bg-green-100">
+                    <p>日本語：{message.content}</p>
+                  </div>
+                  {translationMessages[index] && (
+                    <div className={`p-3 rounded-lg ${translationMessages[index].status === 'api' ? 'bg-blue-100' : 'bg-yellow-100'}`}>
+                      <p>翻訳（{getLanguageDisplay(targetLanguage)}）：{translationMessages[index].content}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {translationMessages[index].status === 'api' ? '翻訳' : 'フォールバック翻訳'}
+                      </p>
+                    </div>
+                  )}
                 </div>
               ))}
-              {transcriptMessages.length === 0 && (
-                <p className="text-gray-600">まだメッセージはありません。話し始めると音声認識結果が表示されます。</p>
-              )}
-              <div ref={japaneseMessagesEndRef} />
             </div>
           </div>
-          <div className="w-1/2 bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
+        ) : layoutMode === 'translation-only' ? (
+          <div className="bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
             <h2 className="text-xl font-semibold mb-4">翻訳 ({getLanguageDisplay(targetLanguage)})</h2>
             <div className="space-y-4">
               {translationMessages.map((message) => (
                 <div key={message.timestamp} className={`p-3 rounded-lg ${message.status === 'api' ? 'bg-blue-100' : 'bg-yellow-100'}`}>
                   <p>{message.content}</p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {message.status === 'api' ? 'API翻訳' : 'フォールバック翻訳'}
+                    {message.status === 'api' ? '翻訳' : 'フォールバック翻訳'}
                   </p>
                 </div>
               ))}
@@ -336,7 +387,47 @@ export default function SimultaneousInterpretationSystem() {
               <div ref={translatedMessagesEndRef} />
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex space-x-4">
+            <div className="w-1/2 bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
+              <h2 className="text-xl font-semibold mb-4">日本語</h2>
+              <div className="space-y-4">
+                {transcriptMessages.map((message) => (
+                  <div key={message.timestamp} className="p-3 rounded-lg bg-green-100">
+                    <p>{message.content}</p>
+                  </div>
+                ))}
+                {transcriptMessages.length === 0 && (
+                  <p className="text-gray-600">まだメッセージはありません。話し始めると音声認識結果が表示されます。</p>
+                )}
+                <div ref={japaneseMessagesEndRef} />
+              </div>
+            </div>
+            <div className="w-1/2 bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
+              <div className={layoutMode === 'inverse' ? 'transform rotate-180' : ''}>
+                <h2 className={`text-xl font-semibold mb-4 ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}>
+                  翻訳 ({getLanguageDisplay(targetLanguage)})
+                </h2>
+                <div className={`space-y-4 ${layoutMode === 'inverse' ? 'transform rotate-180 flex flex-col-reverse' : ''}`}>
+                  {translationMessages.map((message) => (
+                    <div key={message.timestamp} className={`p-3 rounded-lg ${message.status === 'api' ? 'bg-blue-100' : 'bg-yellow-100'} ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}>
+                      <p>{message.content}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {message.status === 'api' ? '翻訳' : 'フォールバック翻訳'}
+                      </p>
+                    </div>
+                  ))}
+                  {translationMessages.length === 0 && (
+                    <p className={`text-gray-600 ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}>
+                      まだ翻訳結果はありません。音声認識が開始されると翻訳結果が表示されます。
+                    </p>
+                  )}
+                  <div ref={translatedMessagesEndRef} />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

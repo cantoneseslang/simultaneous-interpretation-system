@@ -230,6 +230,32 @@ self.__RSC_MANIFEST={
         "async": false
       }
     },
+    "(app-client)/./app/hooks/useAudioProcessing.ts": {
+      "*": {
+        "id": "(sc_client)/./app/hooks/useAudioProcessing.ts",
+        "name": "*",
+        "chunks": [
+          "app/page:static/chunks/app/page.js"
+        ],
+        "async": false
+      },
+      "": {
+        "id": "(sc_client)/./app/hooks/useAudioProcessing.ts",
+        "name": "",
+        "chunks": [
+          "app/page:static/chunks/app/page.js"
+        ],
+        "async": false
+      },
+      "useAudioProcessing": {
+        "id": "(sc_client)/./app/hooks/useAudioProcessing.ts",
+        "name": "useAudioProcessing",
+        "chunks": [
+          "app/page:static/chunks/app/page.js"
+        ],
+        "async": false
+      }
+    },
     "(app-client)/./app/page.tsx": {
       "*": {
         "id": "(sc_client)/./app/page.tsx",
@@ -1086,19 +1112,29 @@ self.__RSC_MANIFEST={
       ],
       "async": false
     },
-    "/Users/sakonhiroki/simultaneous-interpretation-system/app/globals.css#": {
-      "id": "null",
-      "name": "default",
+    "/Users/sakonhiroki/simultaneous-interpretation-system/app/hooks/useAudioProcessing.ts": {
+      "id": "(app-client)/./app/hooks/useAudioProcessing.ts",
+      "name": "*",
       "chunks": [
-        "static/css/app/layout.css"
-      ]
+        "app/page:static/chunks/app/page.js"
+      ],
+      "async": false
     },
-    "/Users/sakonhiroki/simultaneous-interpretation-system/node_modules/next/font/google/target.css?{\"path\":\"app/layout.tsx\",\"import\":\"Inter\",\"arguments\":[{\"subsets\":[\"latin\"]}],\"variableName\":\"inter\"}#": {
-      "id": "null",
-      "name": "default",
+    "/Users/sakonhiroki/simultaneous-interpretation-system/app/hooks/useAudioProcessing.ts#": {
+      "id": "(app-client)/./app/hooks/useAudioProcessing.ts",
+      "name": "",
       "chunks": [
-        "static/css/app/layout.css"
-      ]
+        "app/page:static/chunks/app/page.js"
+      ],
+      "async": false
+    },
+    "/Users/sakonhiroki/simultaneous-interpretation-system/app/hooks/useAudioProcessing.ts#useAudioProcessing": {
+      "id": "(app-client)/./app/hooks/useAudioProcessing.ts",
+      "name": "useAudioProcessing",
+      "chunks": [
+        "app/page:static/chunks/app/page.js"
+      ],
+      "async": false
     },
     "/Users/sakonhiroki/simultaneous-interpretation-system/app/page.tsx": {
       "id": "(app-client)/./app/page.tsx",
@@ -1267,6 +1303,20 @@ self.__RSC_MANIFEST={
         "app/page:static/chunks/app/page.js"
       ],
       "async": false
+    },
+    "/Users/sakonhiroki/simultaneous-interpretation-system/app/globals.css#": {
+      "id": "null",
+      "name": "default",
+      "chunks": [
+        "static/css/app/layout.css"
+      ]
+    },
+    "/Users/sakonhiroki/simultaneous-interpretation-system/node_modules/next/font/google/target.css?{\"path\":\"app/layout.tsx\",\"import\":\"Inter\",\"arguments\":[{\"subsets\":[\"latin\"]}],\"variableName\":\"inter\"}#": {
+      "id": "null",
+      "name": "default",
+      "chunks": [
+        "static/css/app/layout.css"
+      ]
     }
   }
 }

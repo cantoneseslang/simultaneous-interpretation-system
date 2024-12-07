@@ -1,4 +1,7 @@
+'use client'
+
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { debounce } from 'lodash';
 
 interface Message {
   type: 'transcript' | 'translation';
@@ -13,7 +16,6 @@ interface PerformanceMetrics {
   cpuUsage: number;
 }
 
-// 型宣言を追加
 declare global {
   interface Window {
     SpeechRecognition?: typeof SpeechRecognition;
@@ -49,7 +51,6 @@ declare global {
   }
 }
 
-// メイン処理
 export function useAudioProcessing(
   targetLanguage: string,
   useLocalProcessing: boolean,
@@ -78,6 +79,40 @@ export function useAudioProcessing(
     setMessages([]);
   }, []);
 
+  // デバウンスされた翻訳処理
+  const debouncedTranslate = useMemo(
+    () =>
+      debounce(async (text: string, isFinal: boolean) => {
+        try {
+          const response = await fetch('/api/translate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text, targetLanguage }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Translation API request failed');
+          }
+
+          const data = await response.json();
+          const translationMessage: Message = {
+            type: 'translation',
+            content: data.translation,
+            timestamp: Date.now(),
+            isFinal,
+            status: 'api',
+          };
+          addMessage(translationMessage);
+        } catch (error) {
+          console.error('Translation error:', error);
+          setError('翻訳エラーが発生しました。');
+        }
+      }, updateInterval),
+    [targetLanguage, addMessage, updateInterval]
+  );
+
   const processTranscript = useCallback(
     async (transcript: string, isFinal: boolean) => {
       if (transcript.trim()) {
@@ -89,41 +124,24 @@ export function useAudioProcessing(
         };
         addMessage(newMessage);
 
-        if (isFinal) {
-          try {
-            const response = await fetch('/api/translate', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ text: transcript, targetLanguage }),
-            });
+        // インテリジェントな区切り処理
+        const shouldTranslate = 
+          isFinal || 
+          transcript.includes('。') || 
+          transcript.includes('、') ||
+          transcript.includes('？') ||
+          transcript.includes('！') ||
+          transcript.length > 22;// 任意の文字数
 
-            if (!response.ok) {
-              throw new Error('Translation API request failed');
-            }
-
-            const data = await response.json();
-            const translationMessage: Message = {
-              type: 'translation',
-              content: data.translation,
-              timestamp: Date.now(),
-              isFinal: true,
-              status: 'api',
-            };
-            addMessage(translationMessage);
-          } catch (error) {
-            console.error('Translation error:', error);
-            setError('翻訳エラーが発生しました。');
-          }
+        if (shouldTranslate) {
+          debouncedTranslate(transcript, isFinal);
         }
       }
     },
-    [addMessage, targetLanguage]
+    [addMessage, debouncedTranslate]
   );
 
   const startListening = useCallback(() => {
-    // 既存のインスタンスがあれば停止して破棄
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       recognitionRef.current = null;
@@ -139,11 +157,11 @@ export function useAudioProcessing(
     const recognition = new SpeechRecognition();
     recognition.lang = 'ja-JP';
     recognition.continuous = true;
-    recognition.interimResults = true;
+    recognition.interimResults = true;// これにより途中結果も取得できます
 
     recognition.onstart = () => {
       setIsListening(true);
-      setError(null); // エラー状態をリセット
+      setError(null);
       
       if (!audioContextRef.current) {
         const audioContext = new AudioContext();
@@ -183,7 +201,6 @@ export function useAudioProcessing(
 
     recognition.onend = () => {
       setIsListening(false);
-      // 継続的に聞き続ける場合は、自動的に再開
       if (recognitionRef.current === recognition) {
         try {
           recognition.start();
@@ -216,6 +233,12 @@ export function useAudioProcessing(
       dataArrayRef.current = null;
     }
   }, []);
+
+  useEffect(() => {
+    return () => {
+      debouncedTranslate.cancel();
+    };
+  }, [debouncedTranslate]);
 
   return {
     isListening,
