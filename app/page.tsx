@@ -189,7 +189,14 @@ export default function SimultaneousInterpretationSystem() {
 return (
   <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
   <div className="max-w-6xl mx-auto">
-    <h1 className="text-3xl font-bold text-center mb-8">EarthSync</h1>
+    <h1 className="text-3xl font-bold text-center mb-8 flex items-center justify-center gap-2">
+      <img 
+        src="/assets/logo/lifesupport-icon-512x512.png"
+        alt="Life Support Icon" 
+        className="h-8 w-8"
+      />
+      EarthSync
+    </h1>
     
     <div className="bg-white shadow-md rounded-lg p-6 mb-6">
       <div className="flex flex-col gap-4">
