@@ -1,20 +1,24 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Translate } from '@google-cloud/translate/build/src/v2';
 
+// 認証情報を適切に処理
+const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS || '{}');
+if (credentials.private_key) {
+  // バックスラッシュとnの組み合わせを実際の改行に変換
+  credentials.private_key = credentials.private_key
+    .replace(/\\n/g, '\n')
+    .replace(/\n/g, '\n');
+}
+
 const translateClient = new Translate({
   projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-  credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS || '{}')
+  credentials: credentials
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     const { text, targetLanguage } = req.body;
     
-    console.log('Using credentials:', {
-      projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-      credentials: process.env.GOOGLE_APPLICATION_CREDENTIALS ? 'Credentials loaded' : 'No credentials'
-    });
-
     try {
       const [translation] = await translateClient.translate(text, targetLanguage);
       res.status(200).json({ translation });
