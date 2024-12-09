@@ -178,11 +178,11 @@ export default function SimultaneousInterpretationSystem() {
       case 'ha': return 'ハウサ語';
       case 'ig': return 'イボ語';
       case 'yo': return 'ヨルバ語';
-      case 'mg': return 'マダガスカル語';
 
       // 国際補助言語
       case 'eo': return 'エスペラント語';
-      case 'ia': return 'インターリングア';
+
+      default: return 'その他';
     }
 };
 
