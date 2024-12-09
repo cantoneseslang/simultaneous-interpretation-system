@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     console.log('Using credentials:', {
       projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-      credentialsPath: process.env.GOOGLE_APPLICATION_CREDENTIALS
+      credentials: process.env.GOOGLE_APPLICATION_CREDENTIALS ? 'Credentials loaded' : 'No credentials'
     });
 
     try {
