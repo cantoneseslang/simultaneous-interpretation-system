@@ -192,161 +192,167 @@ return (
       <h1 className="text-3xl font-bold text-center mb-8">EarthSync</h1>
       
       <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <Button 
-            onClick={toggleListening}
-            variant={isListening ? "destructive" : "default"}
-          >
-            {isListening ? '停止' : '開始'}
-          </Button>
-          <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-            <SelectTrigger>
-              <SelectValue placeholder="言語を選択" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="en">英語</SelectItem>
-              <SelectItem value="zh">中国語（簡体字）</SelectItem>
-              <SelectItem value="zh-HK">広東語（繁体字）</SelectItem>
-              <SelectItem value="zh-TW">台湾中国語（繁体字）</SelectItem>
-              <SelectItem value="ko">韓国語</SelectItem>
-              <SelectItem value="mo">モンゴル語</SelectItem>
-              <SelectItem value="vi">ベトナム語</SelectItem>
-              <SelectItem value="th">タイ語</SelectItem>
-              <SelectItem value="ms">マレー語</SelectItem>
-              <SelectItem value="id">インドネシア語</SelectItem>
-              <SelectItem value="fil">フィリピン語</SelectItem>
-              <SelectItem value="my">ミャンマー語</SelectItem>
-              <SelectItem value="km">クメール語</SelectItem>
-              <SelectItem value="lo">ラオ語</SelectItem>
-              <SelectItem value="tl">タガログ語</SelectItem>
-              <SelectItem value="hi">ヒンディー語</SelectItem>
-              <SelectItem value="bn">ベンガル語</SelectItem>
-              <SelectItem value="ur">ウルドゥー語</SelectItem>
-              <SelectItem value="ta">タミル語</SelectItem>
-              <SelectItem value="te">テルグ語</SelectItem>
-              <SelectItem value="mr">マラーティー語</SelectItem>
-              <SelectItem value="gu">グジャラーティー語</SelectItem>
-              <SelectItem value="kn">カンナダ語</SelectItem>
-              <SelectItem value="ml">マラヤーラム語</SelectItem>
-              <SelectItem value="pa">パンジャーブ語</SelectItem>
-              <SelectItem value="or">オリヤー語</SelectItem>
-              <SelectItem value="si">シンハラ語</SelectItem>
-              <SelectItem value="fr">フランス語</SelectItem>
-              <SelectItem value="de">ドイツ語</SelectItem>
-              <SelectItem value="es">スペイン語</SelectItem>
-              <SelectItem value="it">イタリア語</SelectItem>
-              <SelectItem value="pt">ポルトガル語</SelectItem>
-              <SelectItem value="nl">オランダ語</SelectItem>
-              <SelectItem value="sv">スウェーデン語</SelectItem>
-              <SelectItem value="da">デンマーク語</SelectItem>
-              <SelectItem value="no">ノルウェー語</SelectItem>
-              <SelectItem value="fi">フィンランド語</SelectItem>
-              <SelectItem value="is">アイスランド語</SelectItem>
-              <SelectItem value="ru">ロシア語</SelectItem>
-              <SelectItem value="pl">ポーランド語</SelectItem>
-              <SelectItem value="uk">ウクライナ語</SelectItem>
-              <SelectItem value="cs">チェコ語</SelectItem>
-              <SelectItem value="hu">ハンガリー語</SelectItem>
-              <SelectItem value="ro">ルーマニア語</SelectItem>
-              <SelectItem value="bg">ブルガリア語</SelectItem>
-              <SelectItem value="sk">スロバキア語</SelectItem>
-              <SelectItem value="hr">クロアチア語</SelectItem>
-              <SelectItem value="sr">セルビア語</SelectItem>
-              <SelectItem value="sl">スロベニア語</SelectItem>
-              <SelectItem value="lt">リトアニア語</SelectItem>
-              <SelectItem value="lv">ラトビア語</SelectItem>
-              <SelectItem value="et">エストニア語</SelectItem>
-              <SelectItem value="el">ギリシャ語</SelectItem>
-              <SelectItem value="tr">トルコ語</SelectItem>
-              <SelectItem value="ka">グルジア語</SelectItem>
-              <SelectItem value="ar">アラビア語</SelectItem>
-              <SelectItem value="he">ヘブライ語</SelectItem>
-              <SelectItem value="fa">ペルシャ語</SelectItem>
-              <SelectItem value="ku">クルド語</SelectItem>
-              <SelectItem value="am">アムハラ語</SelectItem>
-              <SelectItem value="yi">イディッシュ語</SelectItem>
-              <SelectItem value="sw">スワヒリ語</SelectItem>
-              <SelectItem value="zu">ズールー語</SelectItem>
-              <SelectItem value="xh">コーサ語</SelectItem>
-              <SelectItem value="ny">チェワ語</SelectItem>
-              <SelectItem value="ha">ハウサ語</SelectItem>
-              <SelectItem value="ig">イボ語</SelectItem>
-              <SelectItem value="yo">ヨルバ語</SelectItem>
-              <SelectItem value="eo">エスペラント語</SelectItem>
-            </SelectContent>
-            </Select>
-            {renderLayoutButtons()}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setShowOptions(!showOptions)}
-              className={showOptions ? 'bg-accent' : ''}
-            >
-              <Settings2 className="h-4 w-4" />
-            </Button>
-            <Button onClick={clearConversation} variant="outline">
-              会話をクリア
-            </Button>
-          </div>
+  <div className="flex flex-col gap-4">
+    <div className="flex justify-between items-center">
+      <Button 
+        onClick={toggleListening}
+        variant={isListening ? "destructive" : "default"}
+      >
+        {isListening ? '停止' : '開始'}
+      </Button>
+      <Select value={targetLanguage} onValueChange={setTargetLanguage}>
+        <SelectTrigger>
+          <SelectValue placeholder="言語を選択" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="en">英語</SelectItem>
+          <SelectItem value="zh">中国語（簡体字）</SelectItem>
+          <SelectItem value="zh-HK">広東語（繁体字）</SelectItem>
+          <SelectItem value="zh-TW">台湾中国語（繁体字）</SelectItem>
+          <SelectItem value="ko">韓国語</SelectItem>
+          <SelectItem value="mo">モンゴル語</SelectItem>
+          <SelectItem value="vi">ベトナム語</SelectItem>
+          <SelectItem value="th">タイ語</SelectItem>
+          <SelectItem value="ms">マレー語</SelectItem>
+          <SelectItem value="id">インドネシア語</SelectItem>
+          <SelectItem value="fil">フィリピン語</SelectItem>
+          <SelectItem value="my">ミャンマー語</SelectItem>
+          <SelectItem value="km">クメール語</SelectItem>
+          <SelectItem value="lo">ラオ語</SelectItem>
+          <SelectItem value="tl">タガログ語</SelectItem>
+          <SelectItem value="hi">ヒンディー語</SelectItem>
+          <SelectItem value="bn">ベンガル語</SelectItem>
+          <SelectItem value="ur">ウルドゥー語</SelectItem>
+          <SelectItem value="ta">タミル語</SelectItem>
+          <SelectItem value="te">テルグ語</SelectItem>
+          <SelectItem value="mr">マラーティー語</SelectItem>
+          <SelectItem value="gu">グジャラーティー語</SelectItem>
+          <SelectItem value="kn">カンナダ語</SelectItem>
+          <SelectItem value="ml">マラヤーラム語</SelectItem>
+          <SelectItem value="pa">パンジャーブ語</SelectItem>
+          <SelectItem value="or">オリヤー語</SelectItem>
+          <SelectItem value="si">シンハラ語</SelectItem>
+          <SelectItem value="fr">フランス語</SelectItem>
+          <SelectItem value="de">ドイツ語</SelectItem>
+          <SelectItem value="es">スペイン語</SelectItem>
+          <SelectItem value="it">イタリア語</SelectItem>
+          <SelectItem value="pt">ポルトガル語</SelectItem>
+          <SelectItem value="nl">オランダ語</SelectItem>
+          <SelectItem value="sv">スウェーデン語</SelectItem>
+          <SelectItem value="da">デンマーク語</SelectItem>
+          <SelectItem value="no">ノルウェー語</SelectItem>
+          <SelectItem value="fi">フィンランド語</SelectItem>
+          <SelectItem value="is">アイスランド語</SelectItem>
+          <SelectItem value="ru">ロシア語</SelectItem>
+          <SelectItem value="pl">ポーランド語</SelectItem>
+          <SelectItem value="uk">ウクライナ語</SelectItem>
+          <SelectItem value="cs">チェコ語</SelectItem>
+          <SelectItem value="hu">ハンガリー語</SelectItem>
+          <SelectItem value="ro">ルーマニア語</SelectItem>
+          <SelectItem value="bg">ブルガリア語</SelectItem>
+          <SelectItem value="sk">スロバキア語</SelectItem>
+          <SelectItem value="hr">クロアチア語</SelectItem>
+          <SelectItem value="sr">セルビア語</SelectItem>
+          <SelectItem value="sl">スロベニア語</SelectItem>
+          <SelectItem value="lt">リトアニア語</SelectItem>
+          <SelectItem value="lv">ラトビア語</SelectItem>
+          <SelectItem value="et">エストニア語</SelectItem>
+          <SelectItem value="el">ギリシャ語</SelectItem>
+          <SelectItem value="tr">トルコ語</SelectItem>
+          <SelectItem value="ka">グルジア語</SelectItem>
+          <SelectItem value="ar">アラビア語</SelectItem>
+          <SelectItem value="he">ヘブライ語</SelectItem>
+          <SelectItem value="fa">ペルシャ語</SelectItem>
+          <SelectItem value="ku">クルド語</SelectItem>
+          <SelectItem value="am">アムハラ語</SelectItem>
+          <SelectItem value="yi">イディッシュ語</SelectItem>
+          <SelectItem value="sw">スワヒリ語</SelectItem>
+          <SelectItem value="zu">ズールー語</SelectItem>
+          <SelectItem value="xh">コーサ語</SelectItem>
+          <SelectItem value="ny">チェワ語</SelectItem>
+          <SelectItem value="ha">ハウサ語</SelectItem>
+          <SelectItem value="ig">イボ語</SelectItem>
+          <SelectItem value="yo">ヨルバ語</SelectItem>
+          <SelectItem value="eo">エスペラント語</SelectItem>
+        </SelectContent>
+      </Select>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setShowOptions(!showOptions)}
+          className={showOptions ? 'bg-accent' : ''}
+        >
+          <Settings2 className="h-4 w-4" />
+        </Button>
+        <Button onClick={clearConversation} variant="outline">
+          会話をクリア
+        </Button>
+      </div>
+    </div>
+    <div className="flex justify-center">
+      {renderLayoutButtons()}
+    </div>
+  </div>
 
-          {showOptions && (
-            <div className="space-y-4 mt-4 pt-4 border-t">
-              <div className="flex items-center justify-between">
-                <span>ローカル処理を使用</span>
-                <Switch
-                  checked={useLocalProcessing}
-                  onCheckedChange={setUseLocalProcessing}
-                />
-              </div>
-              <div>
-                <label htmlFor="update-interval" className="block text-sm font-medium text-gray-700 mb-2">
-                  音声認識の更新間隔: {updateInterval}ミリ秒
-                </label>
-                <Slider
-                  id="update-interval"
-                  min={50}
-                  max={500}
-                  step={50}
-                  value={[updateInterval]}
-                  onValueChange={(value) => setUpdateInterval(value[0])}
-                  className="w-full"
-                />
-              </div>
-              <div>
-                <label htmlFor="voice-threshold" className="block text-sm font-medium text-gray-700 mb-2">
-                  音声検出閾値: {voiceThreshold.toFixed(3)}
-                </label>
-                <Slider
-                  id="voice-threshold"
-                  min={0.01}
-                  max={0.5}
-                  step={0.01}
-                  value={[voiceThreshold]}
-                  onValueChange={(value) => setVoiceThreshold(value[0])}
-                  className="w-full"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  マイク音量
-                </label>
-                <VolumeGauge volume={currentVolume} />
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-2">パフォーマンスメトリクス</h3>
-                <p>メモリ使用量: {performanceMetrics.memoryUsage.toFixed(2)} MB</p>
-                <p>CPU使用率: {performanceMetrics.cpuUsage.toFixed(2)}%</p>
-              </div>
-            </div>
-          )}
-          
-          {error && (
-            <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">
-              <p>エラーが発生しました: {error}</p>
-              <p>システムを再起動してください。問題が解決しない場合は、管理者にお問い合わせください。</p>
-            </div>
-          )}
-        </div>
+  {showOptions && (
+    <div className="space-y-4 mt-4 pt-4 border-t">
+      <div className="flex items-center justify-between">
+        <span>ローカル処理を使用</span>
+        <Switch
+          checked={useLocalProcessing}
+          onCheckedChange={setUseLocalProcessing}
+        />
+      </div>
+      <div>
+        <label htmlFor="update-interval" className="block text-sm font-medium text-gray-700 mb-2">
+          音声認識の更新間隔: {updateInterval}ミリ秒
+        </label>
+        <Slider
+          id="update-interval"
+          min={50}
+          max={500}
+          step={50}
+          value={[updateInterval]}
+          onValueChange={(value) => setUpdateInterval(value[0])}
+          className="w-full"
+        />
+      </div>
+      <div>
+        <label htmlFor="voice-threshold" className="block text-sm font-medium text-gray-700 mb-2">
+          音声検出閾値: {voiceThreshold.toFixed(3)}
+        </label>
+        <Slider
+          id="voice-threshold"
+          min={0.01}
+          max={0.5}
+          step={0.01}
+          value={[voiceThreshold]}
+          onValueChange={(value) => setVoiceThreshold(value[0])}
+          className="w-full"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          マイク音量
+        </label>
+        <VolumeGauge volume={currentVolume} />
+      </div>
+      <div>
+        <h3 className="text-sm font-medium text-gray-700 mb-2">パフォーマンスメトリクス</h3>
+        <p>メモリ使用量: {performanceMetrics.memoryUsage.toFixed(2)} MB</p>
+        <p>CPU使用率: {performanceMetrics.cpuUsage.toFixed(2)}%</p>
+      </div>
+    </div>
+  )}
+  
+  {error && (
+    <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">
+      <p>エラーが発生しました: {error}</p>
+      <p>システムを再起動してください。問題が解決しない場合は、管理者にお問い合わせください。</p>
+    </div>
+  )}
+</div>
         
         {layoutMode === 'vertical' ? (
           <div className="bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
