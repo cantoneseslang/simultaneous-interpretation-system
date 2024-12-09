@@ -188,23 +188,24 @@ export default function SimultaneousInterpretationSystem() {
 
 return (
   <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-    <div className="max-w-6xl mx-auto">
-      <h1 className="text-3xl font-bold text-center mb-8">EarthSync</h1>
-      
-      <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-  <div className="flex flex-col gap-4">
-    <div className="flex justify-between items-center">
-      <Button 
-        onClick={toggleListening}
-        variant={isListening ? "destructive" : "default"}
-      >
-        {isListening ? '停止' : '開始'}
-      </Button>
-      <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-        <SelectTrigger>
-          <SelectValue placeholder="言語を選択" />
-        </SelectTrigger>
-        <SelectContent>
+  <div className="max-w-6xl mx-auto">
+    <h1 className="text-3xl font-bold text-center mb-8">EarthSync</h1>
+    
+    <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+      <div className="flex flex-col gap-4">
+        {/* 上段：開始ボタンと言語選択のみ */}
+        <div className="flex justify-between items-center">
+          <Button 
+            onClick={toggleListening}
+            variant={isListening ? "destructive" : "default"}
+          >
+            {isListening ? '停止' : '開始'}
+          </Button>
+          <Select value={targetLanguage} onValueChange={setTargetLanguage}>
+            <SelectTrigger>
+              <SelectValue placeholder="言語を選択" />
+            </SelectTrigger>
+            <SelectContent>
           <SelectItem value="en">英語</SelectItem>
           <SelectItem value="zh">中国語（簡体字）</SelectItem>
           <SelectItem value="zh-HK">広東語（繁体字）</SelectItem>
@@ -276,165 +277,165 @@ return (
           <SelectItem value="eo">エスペラント語</SelectItem>
         </SelectContent>
       </Select>
-      <div className="flex gap-2">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => setShowOptions(!showOptions)}
-          className={showOptions ? 'bg-accent' : ''}
-        >
-          <Settings2 className="h-4 w-4" />
-        </Button>
-        <Button onClick={clearConversation} variant="outline">
-          会話をクリア
-        </Button>
       </div>
+
+{/* 下段：レイアウトボタン、設定ボタン、クリアボタンを全て配置 */}
+<div className="flex justify-center gap-4 items-center">
+  {renderLayoutButtons()}
+  <Button
+    variant="outline"
+    size="icon"
+    onClick={() => setShowOptions(!showOptions)}
+    className={showOptions ? 'bg-accent' : ''}
+  >
+    <Settings2 className="h-4 w-4" />
+  </Button>
+  <Button onClick={clearConversation} variant="outline">
+    会話をクリア
+  </Button>
+</div>
+</div>
+
+{showOptions && (
+<div className="space-y-4 mt-4 pt-4 border-t">
+  <div className="flex items-center justify-between">
+    <span>ローカル処理を使用</span>
+    <Switch
+      checked={useLocalProcessing}
+      onCheckedChange={setUseLocalProcessing}
+    />
+  </div>
+  <div>
+    <label htmlFor="update-interval" className="block text-sm font-medium text-gray-700 mb-2">
+      音声認識の更新間隔: {updateInterval}ミリ秒
+    </label>
+    <Slider
+      id="update-interval"
+      min={50}
+      max={500}
+      step={50}
+      value={[updateInterval]}
+      onValueChange={(value) => setUpdateInterval(value[0])}
+      className="w-full"
+    />
+  </div>
+  <div>
+    <label htmlFor="voice-threshold" className="block text-sm font-medium text-gray-700 mb-2">
+      音声検出閾値: {voiceThreshold.toFixed(3)}
+    </label>
+    <Slider
+      id="voice-threshold"
+      min={0.01}
+      max={0.5}
+      step={0.01}
+      value={[voiceThreshold]}
+      onValueChange={(value) => setVoiceThreshold(value[0])}
+      className="w-full"
+    />
+  </div>
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      マイク音量
+    </label>
+    <VolumeGauge volume={currentVolume} />
+  </div>
+  <div>
+    <h3 className="text-sm font-medium text-gray-700 mb-2">パフォーマンスメトリクス</h3>
+    <p>メモリ使用量: {performanceMetrics.memoryUsage.toFixed(2)} MB</p>
+    <p>CPU使用率: {performanceMetrics.cpuUsage.toFixed(2)}%</p>
+  </div>
+</div>
+)}
+
+{error && (
+<div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">
+  <p>エラーが発生しました: {error}</p>
+  <p>システムを再起動してください。問題が解決しない場合は、管理者にお問い合わせください。</p>
+</div>
+)}
+</div>
+
+{layoutMode === 'vertical' ? (
+<div className="bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
+<h2 className="text-xl font-semibold mb-4">メッセージ</h2>
+<div className="space-y-4">
+  {transcriptMessages.map((message, index) => (
+    <div key={`message-${message.timestamp}`} className="space-y-2">
+      <div className="p-3 rounded-lg bg-green-100">
+        <p>日本語：{message.content}</p>
+      </div>
+      {translationMessages[index] && (
+        <div className={`p-3 rounded-lg ${translationMessages[index].status === 'api' ? 'bg-blue-100' : 'bg-yellow-100'}`}>
+          <p>翻訳（{getLanguageDisplay(targetLanguage)}）：{translationMessages[index].content}</p>
+          <p className="text-xs text-gray-500 mt-1">
+            {translationMessages[index].status === 'api' ? '翻訳' : 'フォールバック翻訳'}
+          </p>
+        </div>
+      )}
     </div>
-    <div className="flex justify-center">
-      {renderLayoutButtons()}
+  ))}
+</div>
+</div>
+) : layoutMode === 'translation-only' ? (
+<div className="bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
+<h2 className="text-xl font-semibold mb-4">翻訳 ({getLanguageDisplay(targetLanguage)})</h2>
+<div className="space-y-4">
+  {translationMessages.map((message) => (
+    <div key={message.timestamp} className={`p-3 rounded-lg ${message.status === 'api' ? 'bg-blue-100' : 'bg-yellow-100'}`}>
+      <p>{message.content}</p>
+      <p className="text-xs text-gray-500 mt-1">
+        {message.status === 'api' ? '翻訳' : 'フォールバック翻訳'}
+      </p>
+    </div>
+  ))}
+  {translationMessages.length === 0 && (
+    <p className="text-gray-600">まだ翻訳結果はありません。音声認識が開始されると翻訳結果が表示されます。</p>
+  )}
+  <div ref={translatedMessagesEndRef} />
+</div>
+</div>
+) : (
+<div className="flex space-x-4">
+<div className="w-1/2 bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
+  <h2 className="text-xl font-semibold mb-4">日本語</h2>
+  <div className="space-y-4">
+    {transcriptMessages.map((message) => (
+      <div key={message.timestamp} className="p-3 rounded-lg bg-green-100">
+        <p>{message.content}</p>
+      </div>
+    ))}
+    {transcriptMessages.length === 0 && (
+      <p className="text-gray-600">まだメッセージはありません。話し始めると音声認識結果が表示されます。</p>
+    )}
+    <div ref={japaneseMessagesEndRef} />
+  </div>
+</div>
+<div className="w-1/2 bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
+  <div className={layoutMode === 'inverse' ? 'transform rotate-180' : ''}>
+    <h2 className={`text-xl font-semibold mb-4 ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}>
+      翻訳 ({getLanguageDisplay(targetLanguage)})
+    </h2>
+    <div className={`space-y-4 ${layoutMode === 'inverse' ? 'transform rotate-180 flex flex-col-reverse' : ''}`}>
+      {translationMessages.map((message) => (
+        <div key={message.timestamp} className={`p-3 rounded-lg ${message.status === 'api' ? 'bg-blue-100' : 'bg-yellow-100'} ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}>
+          <p>{message.content}</p>
+          <p className="text-xs text-gray-500 mt-1">
+            {message.status === 'api' ? '翻訳' : 'フォールバック翻訳'}
+          </p>
+        </div>
+      ))}
+      {translationMessages.length === 0 && (
+        <p className={`text-gray-600 ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}>
+          まだ翻訳結果はありません。音声認識が開始されると翻訳結果が表示されます。
+        </p>
+      )}
+      <div ref={translatedMessagesEndRef} />
     </div>
   </div>
-
-  {showOptions && (
-    <div className="space-y-4 mt-4 pt-4 border-t">
-      <div className="flex items-center justify-between">
-        <span>ローカル処理を使用</span>
-        <Switch
-          checked={useLocalProcessing}
-          onCheckedChange={setUseLocalProcessing}
-        />
-      </div>
-      <div>
-        <label htmlFor="update-interval" className="block text-sm font-medium text-gray-700 mb-2">
-          音声認識の更新間隔: {updateInterval}ミリ秒
-        </label>
-        <Slider
-          id="update-interval"
-          min={50}
-          max={500}
-          step={50}
-          value={[updateInterval]}
-          onValueChange={(value) => setUpdateInterval(value[0])}
-          className="w-full"
-        />
-      </div>
-      <div>
-        <label htmlFor="voice-threshold" className="block text-sm font-medium text-gray-700 mb-2">
-          音声検出閾値: {voiceThreshold.toFixed(3)}
-        </label>
-        <Slider
-          id="voice-threshold"
-          min={0.01}
-          max={0.5}
-          step={0.01}
-          value={[voiceThreshold]}
-          onValueChange={(value) => setVoiceThreshold(value[0])}
-          className="w-full"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          マイク音量
-        </label>
-        <VolumeGauge volume={currentVolume} />
-      </div>
-      <div>
-        <h3 className="text-sm font-medium text-gray-700 mb-2">パフォーマンスメトリクス</h3>
-        <p>メモリ使用量: {performanceMetrics.memoryUsage.toFixed(2)} MB</p>
-        <p>CPU使用率: {performanceMetrics.cpuUsage.toFixed(2)}%</p>
-      </div>
-    </div>
-  )}
-  
-  {error && (
-    <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">
-      <p>エラーが発生しました: {error}</p>
-      <p>システムを再起動してください。問題が解決しない場合は、管理者にお問い合わせください。</p>
-    </div>
-  )}
 </div>
-        
-        {layoutMode === 'vertical' ? (
-          <div className="bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4">メッセージ</h2>
-            <div className="space-y-4">
-              {transcriptMessages.map((message, index) => (
-                <div key={`message-${message.timestamp}`} className="space-y-2">
-                  <div className="p-3 rounded-lg bg-green-100">
-                    <p>日本語：{message.content}</p>
-                  </div>
-                  {translationMessages[index] && (
-                    <div className={`p-3 rounded-lg ${translationMessages[index].status === 'api' ? 'bg-blue-100' : 'bg-yellow-100'}`}>
-                      <p>翻訳（{getLanguageDisplay(targetLanguage)}）：{translationMessages[index].content}</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {translationMessages[index].status === 'api' ? '翻訳' : 'フォールバック翻訳'}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : layoutMode === 'translation-only' ? (
-          <div className="bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
-            <h2 className="text-xl font-semibold mb-4">翻訳 ({getLanguageDisplay(targetLanguage)})</h2>
-            <div className="space-y-4">
-              {translationMessages.map((message) => (
-                <div key={message.timestamp} className={`p-3 rounded-lg ${message.status === 'api' ? 'bg-blue-100' : 'bg-yellow-100'}`}>
-                  <p>{message.content}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {message.status === 'api' ? '翻訳' : 'フォールバック翻訳'}
-                  </p>
-                </div>
-              ))}
-              {translationMessages.length === 0 && (
-                <p className="text-gray-600">まだ翻訳結果はありません。音声認識が開始されると翻訳結果が表示されます。</p>
-              )}
-              <div ref={translatedMessagesEndRef} />
-            </div>
-          </div>
-        ) : (
-          <div className="flex space-x-4">
-            <div className="w-1/2 bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
-              <h2 className="text-xl font-semibold mb-4">日本語</h2>
-              <div className="space-y-4">
-                {transcriptMessages.map((message) => (
-                  <div key={message.timestamp} className="p-3 rounded-lg bg-green-100">
-                    <p>{message.content}</p>
-                  </div>
-                ))}
-                {transcriptMessages.length === 0 && (
-                  <p className="text-gray-600">まだメッセージはありません。話し始めると音声認識結果が表示されます。</p>
-                )}
-                <div ref={japaneseMessagesEndRef} />
-              </div>
-            </div>
-            <div className="w-1/2 bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
-              <div className={layoutMode === 'inverse' ? 'transform rotate-180' : ''}>
-                <h2 className={`text-xl font-semibold mb-4 ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}>
-                  翻訳 ({getLanguageDisplay(targetLanguage)})
-                </h2>
-                <div className={`space-y-4 ${layoutMode === 'inverse' ? 'transform rotate-180 flex flex-col-reverse' : ''}`}>
-                  {translationMessages.map((message) => (
-                    <div key={message.timestamp} className={`p-3 rounded-lg ${message.status === 'api' ? 'bg-blue-100' : 'bg-yellow-100'} ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}>
-                      <p>{message.content}</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {message.status === 'api' ? '翻訳' : 'フォールバック翻訳'}
-                      </p>
-                    </div>
-                  ))}
-                  {translationMessages.length === 0 && (
-                    <p className={`text-gray-600 ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}>
-                      まだ翻訳結果はありません。音声認識が開始されると翻訳結果が表示されます。
-                    </p>
-                  )}
-                  <div ref={translatedMessagesEndRef} />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+</div>
+)}
+</div>
+</div>
   )
 }
