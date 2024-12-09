@@ -3,7 +3,7 @@ import { Translate } from '@google-cloud/translate/build/src/v2';
 
 const translateClient = new Translate({
   projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
+  credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS || '{}')
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
