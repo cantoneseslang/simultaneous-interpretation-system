@@ -199,7 +199,7 @@ return (
             onClick={toggleListening}
             variant={isListening ? "destructive" : "default"}
           >
-            {isListening ? '停止' : '開始'}
+            {isListening ? '停止' : '同時通訳開始'}
           </Button>
           <Select value={targetLanguage} onValueChange={setTargetLanguage}>
             <SelectTrigger>
