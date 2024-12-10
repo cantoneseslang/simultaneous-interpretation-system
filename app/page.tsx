@@ -217,16 +217,104 @@ export default function SimultaneousInterpretationSystem() {
           </p>
         </div>
       </div>
- 
+
       <div className="bg-white shadow-md rounded-lg p-6 mb-6">
         <div className="flex flex-col gap-4">
-          {/* 1行目：開始ボタンと翻訳言語選択 */}
+          {/* 1行目：入力言語切替ボタンと国旗ボタン */}
+          <div className="flex items-center gap-4">
+            <Button variant="secondary" className="pointer-events-none">
+              入力言語切替
+            </Button>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setInputLanguage('ja-JP')}
+                className={`
+                  w-8 h-8 
+                  flex items-center justify-center 
+                  rounded-md 
+                  transition-colors
+                  ${inputLanguage === 'ja-JP' ? 'bg-accent' : 'hover:bg-accent/50'}
+                  text-lg
+                `}
+              >
+                🇯🇵
+              </button>
+              <button
+                onClick={() => setInputLanguage('en-US')}
+                className={`
+                  w-8 h-8 
+                  flex items-center justify-center 
+                  rounded-md 
+                  transition-colors
+                  ${inputLanguage === 'en-US' ? 'bg-accent' : 'hover:bg-accent/50'}
+                  text-lg
+                `}
+              >
+                🇺🇸
+              </button>
+              <button
+                onClick={() => setInputLanguage('yue-HK')}
+                className={`
+                  w-8 h-8 
+                  flex items-center justify-center 
+                  rounded-md 
+                  transition-colors
+                  ${inputLanguage === 'yue-HK' ? 'bg-accent' : 'hover:bg-accent/50'}
+                  text-lg
+                `}
+              >
+                🇭🇰
+              </button>
+              <button
+                onClick={() => setInputLanguage('zh-CN')}
+                className={`
+                  w-8 h-8 
+                  flex items-center justify-center 
+                  rounded-md 
+                  transition-colors
+                  ${inputLanguage === 'zh-CN' ? 'bg-accent' : 'hover:bg-accent/50'}
+                  text-lg
+                `}
+              >
+                🇨🇳
+              </button>
+              <button
+                onClick={() => setInputLanguage('ko-KR')}
+                className={`
+                  w-8 h-8 
+                  flex items-center justify-center 
+                  rounded-md 
+                  transition-colors
+                  ${inputLanguage === 'ko-KR' ? 'bg-accent' : 'hover:bg-accent/50'}
+                  text-lg
+                `}
+              >
+                🇰🇷
+              </button>
+              <button
+                onClick={() => setInputLanguage('id-ID')}
+                className={`
+                  w-8 h-8 
+                  flex items-center justify-center 
+                  rounded-md 
+                  transition-colors
+                  ${inputLanguage === 'id-ID' ? 'bg-accent' : 'hover:bg-accent/50'}
+                  text-lg
+                `}
+              >
+                🇮🇩
+              </button>
+            </div>
+          </div>
+
+          {/* 2行目：出力翻訳言語選択と同時通訳開始ボタン */}
           <div className="flex items-center justify-between">
             <Button 
               onClick={toggleListening}
               variant={isListening ? "destructive" : "default"}
             >
-              {isListening ? '停止' : '同時通訳開始'}
+              {isListening ? '停止' : '出力翻訳言語'}
             </Button>
             <Select value={targetLanguage} onValueChange={setTargetLanguage}>
               <SelectTrigger>
@@ -306,110 +394,22 @@ export default function SimultaneousInterpretationSystem() {
               </SelectContent>
             </Select>
           </div>
- 
-          {/* 2行目：入力言語切替ボタン（表示のみ）と国旗ボタン */}
-<div className="flex items-center gap-4">
-  <Button variant="secondary" className="pointer-events-none">
-    入力言語切替
-  </Button>
 
-  <div className="flex gap-2">
-    <button
-      onClick={() => setInputLanguage('ja-JP')}
-      className={`
-        w-8 h-8 
-        flex items-center justify-center 
-        rounded-md 
-        transition-colors
-        ${inputLanguage === 'ja-JP' ? 'bg-accent' : 'hover:bg-accent/50'}
-        text-lg
-      `}
-    >
-      🇯🇵
-    </button>
-    <button
-      onClick={() => setInputLanguage('en-US')}
-      className={`
-        w-8 h-8 
-        flex items-center justify-center 
-        rounded-md 
-        transition-colors
-        ${inputLanguage === 'en-US' ? 'bg-accent' : 'hover:bg-accent/50'}
-        text-lg
-      `}
-    >
-      🇺🇸
-    </button>
-    <button
-      onClick={() => setInputLanguage('yue-HK')}
-      className={`
-        w-8 h-8 
-        flex items-center justify-center 
-        rounded-md 
-        transition-colors
-        ${inputLanguage === 'yue-HK' ? 'bg-accent' : 'hover:bg-accent/50'}
-        text-lg
-      `}
-    >
-      🇭🇰
-    </button>
-    <button
-      onClick={() => setInputLanguage('zh-CN')}
-      className={`
-        w-8 h-8 
-        flex items-center justify-center 
-        rounded-md 
-        transition-colors
-        ${inputLanguage === 'zh-CN' ? 'bg-accent' : 'hover:bg-accent/50'}
-        text-lg
-      `}
-    >
-      🇨🇳
-    </button>
-    <button
-      onClick={() => setInputLanguage('ko-KR')}
-      className={`
-        w-8 h-8 
-        flex items-center justify-center 
-        rounded-md 
-        transition-colors
-        ${inputLanguage === 'ko-KR' ? 'bg-accent' : 'hover:bg-accent/50'}
-        text-lg
-      `}
-    >
-      🇰🇷
-    </button>
-    <button
-      onClick={() => setInputLanguage('id-ID')}
-      className={`
-        w-8 h-8 
-        flex items-center justify-center 
-        rounded-md 
-        transition-colors
-        ${inputLanguage === 'id-ID' ? 'bg-accent' : 'hover:bg-accent/50'}
-        text-lg
-      `}
-    >
-      🇮🇩
-    </button>
-  </div>
-</div>
-
-{/* 3行目：表示切り替えボタン類 */}
-<div className="flex justify-center gap-4 items-center">
-  {renderLayoutButtons()}
-  <Button
-    variant="outline"
-    size="icon"
-    onClick={() => setShowOptions(!showOptions)}
-    className={showOptions ? 'bg-accent' : ''}
-  >
-    <Settings2 className="h-4 w-4" />
-  </Button>
-  <Button onClick={clearConversation} variant="outline">
-    会話をクリア
-  </Button>
-</div>
+          {/* 3行目：表示切り替えボタン類 */}
+          <div className="flex justify-center gap-4 items-center">
+            {renderLayoutButtons()}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setShowOptions(!showOptions)}
+              className={showOptions ? 'bg-accent' : ''}
+            >
+              <Settings2 className="h-4 w-4" />
+            </Button>
+            <Button onClick={clearConversation} variant="outline">
+              会話をクリア
+            </Button>
+          </div>
         </div>
 
 {showOptions && (
