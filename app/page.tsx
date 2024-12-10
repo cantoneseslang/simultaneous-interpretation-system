@@ -308,107 +308,121 @@ export default function SimultaneousInterpretationSystem() {
           </div>
  
           {/* 2行目：入力言語切替ボタン（表示のみ）と国旗ボタン */}
-<div className="flex items-center gap-2">
- <Button variant="secondary" className="pointer-events-none">
-   入力言語切替
- </Button>
-</div>
-<div className="flex justify-center gap-2">
- <button
-   onClick={() => setInputLanguage('ja-JP')}
-   className={`
-     w-8 h-8 
-     flex items-center justify-center 
-     rounded-md 
-     transition-colors
-     ${inputLanguage === 'ja-JP' ? 'bg-accent' : 'hover:bg-accent/50'}
-     text-lg
-   `}
- >
-              🇯🇵
-            </button>
-            <button
-              onClick={() => setInputLanguage('en-US')}
-              className={`
-                w-8 h-8 
-                flex items-center justify-center 
-                rounded-md 
-                transition-colors
-                ${inputLanguage === 'en-US' ? 'bg-accent' : 'hover:bg-accent/50'}
-                text-lg
-              `}
-            >
-              🇺🇸
-            </button>
-            <button
-              onClick={() => setInputLanguage('yue-HK')}
-              className={`
-                w-8 h-8 
-                flex items-center justify-center 
-                rounded-md 
-                transition-colors
-                ${inputLanguage === 'yue-HK' ? 'bg-accent' : 'hover:bg-accent/50'}
-                text-lg
-              `}
-            >
-              🇭🇰
-            </button>
-            <button
-              onClick={() => setInputLanguage('zh-CN')}
-              className={`
-                w-8 h-8 
-                flex items-center justify-center 
-                rounded-md 
-                transition-colors
-                ${inputLanguage === 'zh-CN' ? 'bg-accent' : 'hover:bg-accent/50'}
-                text-lg
-              `}
-            >
-              🇨🇳
-            </button>
-            <button
-              onClick={() => setInputLanguage('ko-KR')}
-              className={`
-                w-8 h-8 
-                flex items-center justify-center 
-                rounded-md 
-                transition-colors
-                ${inputLanguage === 'ko-KR' ? 'bg-accent' : 'hover:bg-accent/50'}
-                text-lg
-              `}
-            >
-              🇰🇷
-            </button>
-            <button
-              onClick={() => setInputLanguage('th-TH')}
-              className={`
-                w-8 h-8 
-                flex items-center justify-center 
-                rounded-md 
-                transition-colors
-                ${inputLanguage === 'th-TH' ? 'bg-accent' : 'hover:bg-accent/50'}
-                text-lg
-              `}
-            >
-              🇹🇭
-            </button>
-          </div>
+<div className="flex items-center gap-4">
+  <Button variant="secondary" className="pointer-events-none">
+    入力言語切替
+  </Button>
 
-          {/* 3行目：表示切り替えボタン類 */}
-          <div className="flex justify-center gap-4 items-center">
-            {renderLayoutButtons()}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setShowOptions(!showOptions)}
-              className={showOptions ? 'bg-accent' : ''}
-            >
-              <Settings2 className="h-4 w-4" />
-            </Button>
-            <Button onClick={clearConversation} variant="outline">
-              会話をクリア
-            </Button>
-          </div>
+  <div className="flex gap-2">
+    <button
+      onClick={() => setInputLanguage('ja-JP')}
+      className={`
+        w-8 h-8 
+        flex items-center justify-center 
+        rounded-md 
+        transition-colors
+        ${inputLanguage === 'ja-JP' ? 'bg-accent' : 'hover:bg-accent/50'}
+        text-lg
+      `}
+    >
+      🇯🇵
+    </button>
+    <button
+      onClick={() => setInputLanguage('en-US')}
+      className={`
+        w-8 h-8 
+        flex items-center justify-center 
+        rounded-md 
+        transition-colors
+        ${inputLanguage === 'en-US' ? 'bg-accent' : 'hover:bg-accent/50'}
+        text-lg
+      `}
+    >
+      🇺🇸
+    </button>
+    <button
+      onClick={() => setInputLanguage('yue-HK')}
+      className={`
+        w-8 h-8 
+        flex items-center justify-center 
+        rounded-md 
+        transition-colors
+        ${inputLanguage === 'yue-HK' ? 'bg-accent' : 'hover:bg-accent/50'}
+        text-lg
+      `}
+    >
+      🇭🇰
+    </button>
+    <button
+      onClick={() => setInputLanguage('zh-CN')}
+      className={`
+        w-8 h-8 
+        flex items-center justify-center 
+        rounded-md 
+        transition-colors
+        ${inputLanguage === 'zh-CN' ? 'bg-accent' : 'hover:bg-accent/50'}
+        text-lg
+      `}
+    >
+      🇨🇳
+    </button>
+    <button
+      onClick={() => setInputLanguage('ko-KR')}
+      className={`
+        w-8 h-8 
+        flex items-center justify-center 
+        rounded-md 
+        transition-colors
+        ${inputLanguage === 'ko-KR' ? 'bg-accent' : 'hover:bg-accent/50'}
+        text-lg
+      `}
+    >
+      🇰🇷
+    </button>
+    <button
+      onClick={() => setInputLanguage('th-TH')}
+      className={`
+        w-8 h-8 
+        flex items-center justify-center 
+        rounded-md 
+        transition-colors
+        ${inputLanguage === 'th-TH' ? 'bg-accent' : 'hover:bg-accent/50'}
+        text-lg
+      `}
+    >
+      🇹🇭
+    </button>
+    <button
+      onClick={() => setInputLanguage('id-ID')}
+      className={`
+        w-8 h-8 
+        flex items-center justify-center 
+        rounded-md 
+        transition-colors
+        ${inputLanguage === 'id-ID' ? 'bg-accent' : 'hover:bg-accent/50'}
+        text-lg
+      `}
+    >
+      🇮🇩
+    </button>
+  </div>
+</div>
+
+{/* 3行目：表示切り替えボタン類 */}
+<div className="flex justify-center gap-4 items-center">
+  {renderLayoutButtons()}
+  <Button
+    variant="outline"
+    size="icon"
+    onClick={() => setShowOptions(!showOptions)}
+    className={showOptions ? 'bg-accent' : ''}
+  >
+    <Settings2 className="h-4 w-4" />
+  </Button>
+  <Button onClick={clearConversation} variant="outline">
+    会話をクリア
+  </Button>
+</div>
         </div>
 
 {showOptions && (
