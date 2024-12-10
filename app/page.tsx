@@ -380,19 +380,6 @@ export default function SimultaneousInterpretationSystem() {
       🇰🇷
     </button>
     <button
-      onClick={() => setInputLanguage('th-TH')}
-      className={`
-        w-8 h-8 
-        flex items-center justify-center 
-        rounded-md 
-        transition-colors
-        ${inputLanguage === 'th-TH' ? 'bg-accent' : 'hover:bg-accent/50'}
-        text-lg
-      `}
-    >
-      🇹🇭
-    </button>
-    <button
       onClick={() => setInputLanguage('id-ID')}
       className={`
         w-8 h-8 
