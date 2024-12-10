@@ -10,7 +10,7 @@ import { Settings2, LayoutListIcon as LayoutSideBySide, LayoutGridIcon as Layout
 import { useAudioProcessing } from './hooks/useAudioProcessing'
 import { VolumeGauge } from './components/VolumeGauge'
 import Link from 'next/link'
-import Loader from './components/ui/Loader';
+
 
 type LayoutMode = 'side-by-side' | 'vertical' | 'inverse' | 'translation-only';
 
