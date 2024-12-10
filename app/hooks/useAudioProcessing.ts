@@ -79,7 +79,6 @@ export function useAudioProcessing(
     setMessages([]);
   }, []);
 
-  // デバウンスされた翻訳処理
   const debouncedTranslate = useMemo(
     () =>
       debounce(async (text: string, isFinal: boolean) => {
@@ -124,14 +123,13 @@ export function useAudioProcessing(
         };
         addMessage(newMessage);
 
-        // インテリジェントな区切り処理
         const shouldTranslate = 
           isFinal || 
           transcript.includes('。') || 
           transcript.includes('、') ||
           transcript.includes('？') ||
           transcript.includes('！') ||
-          transcript.length > 22;// 任意の文字数
+          transcript.length > 22;
 
         if (shouldTranslate) {
           debouncedTranslate(transcript, isFinal);
@@ -157,7 +155,7 @@ export function useAudioProcessing(
     const recognition = new SpeechRecognition();
     recognition.lang = 'ja-JP';
     recognition.continuous = true;
-    recognition.interimResults = true;// これにより途中結果も取得できます
+    recognition.interimResults = true;
 
     recognition.onstart = () => {
       setIsListening(true);
@@ -168,8 +166,8 @@ export function useAudioProcessing(
         const analyser = audioContext.createAnalyser();
         analyser.fftSize = 256;
         analyser.minDecibels = -90;
-        analyser.maxDecibels = -10;  // デシベルの範囲を設定
-        analyser.smoothingTimeConstant = 0.85;  // 値の変化を滑らかにする
+        analyser.maxDecibels = -10;
+        analyser.smoothingTimeConstant = 0.85;
         
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
@@ -178,29 +176,32 @@ export function useAudioProcessing(
         audioContextRef.current = audioContext;
     
         navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+          console.log('Audio stream obtained:', stream);
           const source = audioContext.createMediaStreamSource(stream);
           source.connect(analyser);
+          console.log('Audio source connected to analyser');
           
           const updateVolume = () => {
             if (analyserRef.current && dataArrayRef.current) {
               analyserRef.current.getByteFrequencyData(dataArrayRef.current);
               
-              // より適切な音量計算
               let sum = 0;
               const data = dataArrayRef.current;
               for (let i = 0; i < bufferLength; i++) {
-                sum += data[i] * data[i];  // 二乗して合計
+                sum += data[i] * data[i];
               }
-              const rms = Math.sqrt(sum / bufferLength);  // RMS（二乗平均平方根）を計算
-              const normalizedVolume = Math.min(rms / 128, 1);  // 0-1の範囲に正規化
+              const rms = Math.sqrt(sum / bufferLength);
+              const normalizedVolume = Math.min(rms / 256, 1);
               
+              console.log('Raw RMS:', rms, 'Normalized Volume:', normalizedVolume);
               setCurrentVolume(normalizedVolume);
             }
-            if (isListening) {
-              requestAnimationFrame(updateVolume);
-            }
+            requestAnimationFrame(updateVolume);
           };
           updateVolume();
+        }).catch(error => {
+          console.error('Error getting audio stream:', error);
+          setError('マイクの接続に失敗しました。');
         });
       }
     };
