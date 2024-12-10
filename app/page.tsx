@@ -211,194 +211,206 @@ return (
           </p>
         </div>
       </div>
-
+ 
       <div className="bg-white shadow-md rounded-lg p-6 mb-6">
         <div className="flex flex-col gap-4">
-          {/* 上段：開始ボタン、言語入力切り替え、言語選択 */}
-          <div className="flex items-center gap-4">
+          {/* 1行目：開始ボタンと翻訳言語選択 */}
+          <div className="flex items-center justify-between">
             <Button 
               onClick={toggleListening}
               variant={isListening ? "destructive" : "default"}
             >
               {isListening ? '停止' : '同時通訳開始'}
             </Button>
-
-            {/* 新しく追加する言語入力切り替えボタン群 */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => setInputLanguage('ja-JP')}
-                className={`
-                  w-8 h-8 
-                  flex items-center justify-center 
-                  rounded-md 
-                  transition-colors
-                  ${inputLanguage === 'ja-JP' ? 'bg-accent' : 'hover:bg-accent/50'}
-                  text-lg
-                `}
-              >
-                🇯🇵
-              </button>
-              <button
-                onClick={() => setInputLanguage('en-US')}
-                className={`
-                  w-8 h-8 
-                  flex items-center justify-center 
-                  rounded-md 
-                  transition-colors
-                  ${inputLanguage === 'en-US' ? 'bg-accent' : 'hover:bg-accent/50'}
-                  text-lg
-                `}
-              >
-                🇺🇸
-              </button>
-              <button
-                onClick={() => setInputLanguage('zh-CN')}
-                className={`
-                  w-8 h-8 
-                  flex items-center justify-center 
-                  rounded-md 
-                  transition-colors
-                  ${inputLanguage === 'zh-CN' ? 'bg-accent' : 'hover:bg-accent/50'}
-                  text-lg
-                `}
-              >
-                🇨🇳
-              </button>
-              <button
-                onClick={() => setInputLanguage('ko-KR')}
-                className={`
-                  w-8 h-8 
-                  flex items-center justify-center 
-                  rounded-md 
-                  transition-colors
-                  ${inputLanguage === 'ko-KR' ? 'bg-accent' : 'hover:bg-accent/50'}
-                  text-lg
-                `}
-              >
-                🇰🇷
-              </button>
-              <button
-                onClick={() => setInputLanguage('th-TH')}
-                className={`
-                  w-8 h-8 
-                  flex items-center justify-center 
-                  rounded-md 
-                  transition-colors
-                  ${inputLanguage === 'th-TH' ? 'bg-accent' : 'hover:bg-accent/50'}
-                  text-lg
-                `}
-              >
-                🇹🇭
-              </button>
-              <button
-                onClick={() => setInputLanguage('id-ID')}
-                className={`
-                  w-8 h-8 
-                  flex items-center justify-center 
-                  rounded-md 
-                  transition-colors
-                  ${inputLanguage === 'id-ID' ? 'bg-accent' : 'hover:bg-accent/50'}
-                  text-lg
-                `}
-              >
-                🇮🇩
-              </button>
-            </div>
-
             <Select value={targetLanguage} onValueChange={setTargetLanguage}>
               <SelectTrigger>
                 <SelectValue placeholder="言語を選択" />
               </SelectTrigger>
-            <SelectContent>
-          <SelectItem value="en">英語</SelectItem>
-          <SelectItem value="zh">中国語（簡体字）</SelectItem>
-          <SelectItem value="zh-HK">広東語（繁体字）</SelectItem>
-          <SelectItem value="zh-TW">台湾中国語（繁体字）</SelectItem>
-          <SelectItem value="ko">韓国語</SelectItem>
-          <SelectItem value="mo">モンゴル語</SelectItem>
-          <SelectItem value="vi">ベトナム語</SelectItem>
-          <SelectItem value="th">タイ語</SelectItem>
-          <SelectItem value="ms">マレー語</SelectItem>
-          <SelectItem value="id">インドネシア語</SelectItem>
-          <SelectItem value="fil">フィリピン語</SelectItem>
-          <SelectItem value="my">ミャンマー語</SelectItem>
-          <SelectItem value="km">クメール語</SelectItem>
-          <SelectItem value="lo">ラオ語</SelectItem>
-          <SelectItem value="tl">タガログ語</SelectItem>
-          <SelectItem value="hi">ヒンディー語</SelectItem>
-          <SelectItem value="bn">ベンガル語</SelectItem>
-          <SelectItem value="ur">ウルドゥー語</SelectItem>
-          <SelectItem value="ta">タミル語</SelectItem>
-          <SelectItem value="te">テルグ語</SelectItem>
-          <SelectItem value="mr">マラーティー語</SelectItem>
-          <SelectItem value="gu">グジャラーティー語</SelectItem>
-          <SelectItem value="kn">カンナダ語</SelectItem>
-          <SelectItem value="ml">マラヤーラム語</SelectItem>
-          <SelectItem value="pa">パンジャーブ語</SelectItem>
-          <SelectItem value="or">オリヤー語</SelectItem>
-          <SelectItem value="si">シンハラ語</SelectItem>
-          <SelectItem value="fr">フランス語</SelectItem>
-          <SelectItem value="de">ドイツ語</SelectItem>
-          <SelectItem value="es">スペイン語</SelectItem>
-          <SelectItem value="it">イタリア語</SelectItem>
-          <SelectItem value="pt">ポルトガル語</SelectItem>
-          <SelectItem value="nl">オランダ語</SelectItem>
-          <SelectItem value="sv">スウェーデン語</SelectItem>
-          <SelectItem value="da">デンマーク語</SelectItem>
-          <SelectItem value="no">ノルウェー語</SelectItem>
-          <SelectItem value="fi">フィンランド語</SelectItem>
-          <SelectItem value="is">アイスランド語</SelectItem>
-          <SelectItem value="ru">ロシア語</SelectItem>
-          <SelectItem value="pl">ポーランド語</SelectItem>
-          <SelectItem value="uk">ウクライナ語</SelectItem>
-          <SelectItem value="cs">チェコ語</SelectItem>
-          <SelectItem value="hu">ハンガリー語</SelectItem>
-          <SelectItem value="ro">ルーマニア語</SelectItem>
-          <SelectItem value="bg">ブルガリア語</SelectItem>
-          <SelectItem value="sk">スロバキア語</SelectItem>
-          <SelectItem value="hr">クロアチア語</SelectItem>
-          <SelectItem value="sr">セルビア語</SelectItem>
-          <SelectItem value="sl">スロベニア語</SelectItem>
-          <SelectItem value="lt">リトアニア語</SelectItem>
-          <SelectItem value="lv">ラトビア語</SelectItem>
-          <SelectItem value="et">エストニア語</SelectItem>
-          <SelectItem value="el">ギリシャ語</SelectItem>
-          <SelectItem value="tr">トルコ語</SelectItem>
-          <SelectItem value="ka">グルジア語</SelectItem>
-          <SelectItem value="ar">アラビア語</SelectItem>
-          <SelectItem value="he">ヘブライ語</SelectItem>
-          <SelectItem value="fa">ペルシャ語</SelectItem>
-          <SelectItem value="ku">クルド語</SelectItem>
-          <SelectItem value="am">アムハラ語</SelectItem>
-          <SelectItem value="yi">イディッシュ語</SelectItem>
-          <SelectItem value="sw">スワヒリ語</SelectItem>
-          <SelectItem value="zu">ズールー語</SelectItem>
-          <SelectItem value="xh">コーサ語</SelectItem>
-          <SelectItem value="ny">チェワ語</SelectItem>
-          <SelectItem value="ha">ハウサ語</SelectItem>
-          <SelectItem value="ig">イボ語</SelectItem>
-          <SelectItem value="yo">ヨルバ語</SelectItem>
-          <SelectItem value="eo">エスペラント語</SelectItem>
-        </SelectContent>
-      </Select>
-      </div>
-
-{/* 下段：レイアウトボタン、設定ボタン、クリアボタンを全て配置 */}
-<div className="flex justify-center gap-4 items-center">
-  {renderLayoutButtons()}
-  <Button
-    variant="outline"
-    size="icon"
-    onClick={() => setShowOptions(!showOptions)}
-    className={showOptions ? 'bg-accent' : ''}
-  >
-    <Settings2 className="h-4 w-4" />
-  </Button>
-  <Button onClick={clearConversation} variant="outline">
-    会話をクリア
-  </Button>
-</div>
-</div>
+              <SelectContent>
+                <SelectItem value="en">英語</SelectItem>
+                <SelectItem value="zh">中国語（簡体字）</SelectItem>
+                <SelectItem value="zh-HK">広東語（繁体字）</SelectItem>
+                <SelectItem value="zh-TW">台湾中国語（繁体字）</SelectItem>
+                <SelectItem value="ko">韓国語</SelectItem>
+                <SelectItem value="mo">モンゴル語</SelectItem>
+                <SelectItem value="vi">ベトナム語</SelectItem>
+                <SelectItem value="th">タイ語</SelectItem>
+                <SelectItem value="ms">マレー語</SelectItem>
+                <SelectItem value="id">インドネシア語</SelectItem>
+                <SelectItem value="fil">フィリピン語</SelectItem>
+                <SelectItem value="my">ミャンマー語</SelectItem>
+                <SelectItem value="km">クメール語</SelectItem>
+                <SelectItem value="lo">ラオ語</SelectItem>
+                <SelectItem value="tl">タガログ語</SelectItem>
+                <SelectItem value="hi">ヒンディー語</SelectItem>
+                <SelectItem value="bn">ベンガル語</SelectItem>
+                <SelectItem value="ur">ウルドゥー語</SelectItem>
+                <SelectItem value="ta">タミル語</SelectItem>
+                <SelectItem value="te">テルグ語</SelectItem>
+                <SelectItem value="mr">マラーティー語</SelectItem>
+                <SelectItem value="gu">グジャラーティー語</SelectItem>
+                <SelectItem value="kn">カンナダ語</SelectItem>
+                <SelectItem value="ml">マラヤーラム語</SelectItem>
+                <SelectItem value="pa">パンジャーブ語</SelectItem>
+                <SelectItem value="or">オリヤー語</SelectItem>
+                <SelectItem value="si">シンハラ語</SelectItem>
+                <SelectItem value="fr">フランス語</SelectItem>
+                <SelectItem value="de">ドイツ語</SelectItem>
+                <SelectItem value="es">スペイン語</SelectItem>
+                <SelectItem value="it">イタリア語</SelectItem>
+                <SelectItem value="pt">ポルトガル語</SelectItem>
+                <SelectItem value="nl">オランダ語</SelectItem>
+                <SelectItem value="sv">スウェーデン語</SelectItem>
+                <SelectItem value="da">デンマーク語</SelectItem>
+                <SelectItem value="no">ノルウェー語</SelectItem>
+                <SelectItem value="fi">フィンランド語</SelectItem>
+                <SelectItem value="is">アイスランド語</SelectItem>
+                <SelectItem value="ru">ロシア語</SelectItem>
+                <SelectItem value="pl">ポーランド語</SelectItem>
+                <SelectItem value="uk">ウクライナ語</SelectItem>
+                <SelectItem value="cs">チェコ語</SelectItem>
+                <SelectItem value="hu">ハンガリー語</SelectItem>
+                <SelectItem value="ro">ルーマニア語</SelectItem>
+                <SelectItem value="bg">ブルガリア語</SelectItem>
+                <SelectItem value="sk">スロバキア語</SelectItem>
+                <SelectItem value="hr">クロアチア語</SelectItem>
+                <SelectItem value="sr">セルビア語</SelectItem>
+                <SelectItem value="sl">スロベニア語</SelectItem>
+                <SelectItem value="lt">リトアニア語</SelectItem>
+                <SelectItem value="lv">ラトビア語</SelectItem>
+                <SelectItem value="et">エストニア語</SelectItem>
+                <SelectItem value="el">ギリシャ語</SelectItem>
+                <SelectItem value="tr">トルコ語</SelectItem>
+                <SelectItem value="ka">グルジア語</SelectItem>
+                <SelectItem value="ar">アラビア語</SelectItem>
+                <SelectItem value="he">ヘブライ語</SelectItem>
+                <SelectItem value="fa">ペルシャ語</SelectItem>
+                <SelectItem value="ku">クルド語</SelectItem>
+                <SelectItem value="am">アムハラ語</SelectItem>
+                <SelectItem value="yi">イディッシュ語</SelectItem>
+                <SelectItem value="sw">スワヒリ語</SelectItem>
+                <SelectItem value="zu">ズールー語</SelectItem>
+                <SelectItem value="xh">コーサ語</SelectItem>
+                <SelectItem value="ny">チェワ語</SelectItem>
+                <SelectItem value="ha">ハウサ語</SelectItem>
+                <SelectItem value="ig">イボ語</SelectItem>
+                <SelectItem value="yo">ヨルバ語</SelectItem>
+                <SelectItem value="eo">エスペラント語</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+ 
+          {/* 2行目：入力言語の国旗ボタン */}
+          <div className="flex justify-center gap-2">
+            <button
+              onClick={() => setInputLanguage('ja-JP')}
+              className={`
+                w-8 h-8 
+                flex items-center justify-center 
+                rounded-md 
+                transition-colors
+                ${inputLanguage === 'ja-JP' ? 'bg-accent' : 'hover:bg-accent/50'}
+                text-lg
+              `}
+            >
+              🇯🇵
+            </button>
+            <button
+              onClick={() => setInputLanguage('en-US')}
+              className={`
+                w-8 h-8 
+                flex items-center justify-center 
+                rounded-md 
+                transition-colors
+                ${inputLanguage === 'en-US' ? 'bg-accent' : 'hover:bg-accent/50'}
+                text-lg
+              `}
+            >
+              🇺🇸
+            </button>
+            <button
+              onClick={() => setInputLanguage('yue-HK')}
+              className={`
+                w-8 h-8 
+                flex items-center justify-center 
+                rounded-md 
+                transition-colors
+                ${inputLanguage === 'yue-HK' ? 'bg-accent' : 'hover:bg-accent/50'}
+                text-lg
+              `}
+            >
+              🇭🇰
+            </button>
+            <button
+              onClick={() => setInputLanguage('zh-CN')}
+              className={`
+                w-8 h-8 
+                flex items-center justify-center 
+                rounded-md 
+                transition-colors
+                ${inputLanguage === 'zh-CN' ? 'bg-accent' : 'hover:bg-accent/50'}
+                text-lg
+              `}
+            >
+              🇨🇳
+            </button>
+            <button
+              onClick={() => setInputLanguage('ko-KR')}
+              className={`
+                w-8 h-8 
+                flex items-center justify-center 
+                rounded-md 
+                transition-colors
+                ${inputLanguage === 'ko-KR' ? 'bg-accent' : 'hover:bg-accent/50'}
+                text-lg
+              `}
+            >
+              🇰🇷
+            </button>
+            <button
+              onClick={() => setInputLanguage('th-TH')}
+              className={`
+                w-8 h-8 
+                flex items-center justify-center 
+                rounded-md 
+                transition-colors
+                ${inputLanguage === 'th-TH' ? 'bg-accent' : 'hover:bg-accent/50'}
+                text-lg
+              `}
+            >
+              🇹🇭
+            </button>
+            <button
+              onClick={() => setInputLanguage('id-ID')}
+              className={`
+                w-8 h-8 
+                flex items-center justify-center 
+                rounded-md 
+                transition-colors
+                ${inputLanguage === 'id-ID' ? 'bg-accent' : 'hover:bg-accent/50'}
+                text-lg
+              `}
+            >
+              🇮🇩
+            </button>
+          </div>
+ 
+          {/* 3行目：表示切り替えボタン類 */}
+          <div className="flex justify-center gap-4 items-center">
+            {renderLayoutButtons()}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setShowOptions(!showOptions)}
+              className={showOptions ? 'bg-accent' : ''}
+            >
+              <Settings2 className="h-4 w-4" />
+            </Button>
+            <Button onClick={clearConversation} variant="outline">
+              会話をクリア
+            </Button>
+          </div>
+        </div>
 
 {showOptions && (
 <div className="space-y-4 mt-4 pt-4 border-t">
