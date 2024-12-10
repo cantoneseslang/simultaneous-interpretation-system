@@ -172,15 +172,16 @@ export function useAudioProcessing(
         dataArrayRef.current = dataArray;
         analyserRef.current = analyser;
         audioContextRef.current = audioContext;
-
+    
         navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
           const source = audioContext.createMediaStreamSource(stream);
           source.connect(analyser);
+          // ここの updateVolume 関数を修正する必要があります
           const updateVolume = () => {
             if (analyserRef.current && dataArrayRef.current) {
               analyserRef.current.getByteFrequencyData(dataArrayRef.current);
               const volume = dataArrayRef.current.reduce((a, b) => a + b) / bufferLength;
-              setCurrentVolume(volume);
+              setCurrentVolume(volume);  // この部分を修正
             }
             requestAnimationFrame(updateVolume);
           };
