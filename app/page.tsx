@@ -101,7 +101,9 @@ export default function SimultaneousInterpretationSystem() {
       case 'en': return '英語';
       case 'en-US': return '英語';
       case 'zh': return '中国語（簡体字）';
+      case 'zh-CN': return '中国語';  // 追加
       case 'zh-HK': return '広東語（繁体字）';
+      case 'yue-HK': return '広東語';  // 追加
       case 'zh-TW': return '台湾中国語（繁体字）';
       case 'ko': return '韓国語';
       case 'ko-KR': return '韓国語';
