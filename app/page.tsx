@@ -188,19 +188,28 @@ export default function SimultaneousInterpretationSystem() {
 
 return (
   <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-  <div className="max-w-6xl mx-auto">
-    <h1 className="text-3xl font-bold text-center mb-8">EarthSync</h1>
-    
-    <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-      <div className="flex flex-col gap-4">
-        {/* 上段：開始ボタンと言語選択のみ */}
-        <div className="flex justify-between items-center">
-          <Button 
-            onClick={toggleListening}
-            variant={isListening ? "destructive" : "default"}
-          >
-            {isListening ? '停止' : '同時通訳開始'}
-          </Button>
+    <div className="max-w-6xl mx-auto">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold mb-2">
+          EarthSync
+          <div className="h-1 w-24 bg-blue-500 mx-auto mt-2"></div>
+        </h1>
+        <p className="text-center text-gray-600">
+          71の言語で紡ぐ、ひとつの地球。<br />
+          言葉を超えて、想いをシンクする。
+        </p>
+      </div>
+
+      <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+        <div className="flex flex-col gap-4">
+          {/* 上段：開始ボタンと言語選択のみ */}
+          <div className="flex justify-between items-center">
+            <Button 
+              onClick={toggleListening}
+              variant={isListening ? "destructive" : "default"}
+            >
+              {isListening ? '停止' : '同時通訳開始'}
+            </Button>
           <Select value={targetLanguage} onValueChange={setTargetLanguage}>
             <SelectTrigger>
               <SelectValue placeholder="言語を選択" />
