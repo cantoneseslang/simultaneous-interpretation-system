@@ -308,24 +308,23 @@ export default function SimultaneousInterpretationSystem() {
           </div>
  
           {/* 2行目：入力言語切替ボタン（表示のみ）と国旗ボタン */}
-          <div className="flex items-center gap-2">
-            <Button variant="secondary" className="pointer-events-none">
-              <span className="mr-2">🇯🇵</span>
-              入力言語切替
-            </Button>
-          </div>
-          <div className="flex justify-center gap-2">
-            <button
-              onClick={() => setInputLanguage('ja-JP')}
-              className={`
-                w-8 h-8 
-                flex items-center justify-center 
-                rounded-md 
-                transition-colors
-                ${inputLanguage === 'ja-JP' ? 'bg-accent' : 'hover:bg-accent/50'}
-                text-lg
-              `}
-            >
+<div className="flex items-center gap-2">
+ <Button variant="secondary" className="pointer-events-none">
+   入力言語切替
+ </Button>
+</div>
+<div className="flex justify-center gap-2">
+ <button
+   onClick={() => setInputLanguage('ja-JP')}
+   className={`
+     w-8 h-8 
+     flex items-center justify-center 
+     rounded-md 
+     transition-colors
+     ${inputLanguage === 'ja-JP' ? 'bg-accent' : 'hover:bg-accent/50'}
+     text-lg
+   `}
+ >
               🇯🇵
             </button>
             <button
