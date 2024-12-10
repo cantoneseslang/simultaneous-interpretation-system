@@ -262,7 +262,9 @@ export default function SimultaneousInterpretationSystem() {
                   transition-colors
                   ${inputLanguage === 'yue-HK' ? 'bg-accent' : 'hover:bg-accent/50'}
                   text-lg
+                  relative group
                 `}
+                title={/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? "モバイルでは中国語（繁体字）として認識されます" : "広東語"}
               >
                 🇭🇰
               </button>

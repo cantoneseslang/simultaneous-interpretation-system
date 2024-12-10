@@ -72,6 +72,15 @@ export function useAudioProcessing(
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
 
+  const getAdjustedLanguageCode = (code: string) => {
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      if (code === 'yue-HK') {
+        return 'zh-HK';
+      }
+    }
+    return code;
+  };
+
   const addMessage = useCallback((newMessage: Message) => {
     setMessages((prev) => [...prev, newMessage].slice(-100));
   }, []);
@@ -154,7 +163,7 @@ export function useAudioProcessing(
     }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = inputLanguage;
+    recognition.lang = getAdjustedLanguageCode(inputLanguage);  // 変更箇所
     recognition.continuous = true;
     recognition.interimResults = true;
 
