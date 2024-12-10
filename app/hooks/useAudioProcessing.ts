@@ -167,6 +167,10 @@ export function useAudioProcessing(
         const audioContext = new AudioContext();
         const analyser = audioContext.createAnalyser();
         analyser.fftSize = 256;
+        analyser.minDecibels = -90;
+        analyser.maxDecibels = -10;  // デシベルの範囲を設定
+        analyser.smoothingTimeConstant = 0.85;  // 値の変化を滑らかにする
+        
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
         dataArrayRef.current = dataArray;
@@ -176,14 +180,25 @@ export function useAudioProcessing(
         navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
           const source = audioContext.createMediaStreamSource(stream);
           source.connect(analyser);
-          // ここの updateVolume 関数を修正する必要があります
+          
           const updateVolume = () => {
             if (analyserRef.current && dataArrayRef.current) {
               analyserRef.current.getByteFrequencyData(dataArrayRef.current);
-              const volume = dataArrayRef.current.reduce((a, b) => a + b) / bufferLength;
-              setCurrentVolume(volume);  // この部分を修正
+              
+              // より適切な音量計算
+              let sum = 0;
+              const data = dataArrayRef.current;
+              for (let i = 0; i < bufferLength; i++) {
+                sum += data[i] * data[i];  // 二乗して合計
+              }
+              const rms = Math.sqrt(sum / bufferLength);  // RMS（二乗平均平方根）を計算
+              const normalizedVolume = Math.min(rms / 128, 1);  // 0-1の範囲に正規化
+              
+              setCurrentVolume(normalizedVolume);
             }
-            requestAnimationFrame(updateVolume);
+            if (isListening) {
+              requestAnimationFrame(updateVolume);
+            }
           };
           updateVolume();
         });
