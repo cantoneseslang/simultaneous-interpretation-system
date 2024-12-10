@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { debounce } from 'lodash';
 
 interface Message {
   type: 'transcript' | 'translation';
@@ -69,79 +70,76 @@ export function useAudioProcessing(
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
-  const translationQueue = useRef<string[]>([]);
-  const lastTranslationTime = useRef<number>(0);
-  const MIN_TRANSLATION_INTERVAL = 300; // ミリ秒
 
-  const processTranslation = useCallback(async (text: string, isFinal: boolean) => {
-    const currentTime = Date.now();
-    
-    // 短すぎるテキストは翻訳しない
-    if (text.length < 3) return;
+  const addMessage = useCallback((newMessage: Message) => {
+    setMessages((prev) => [...prev, newMessage].slice(-100));
+  }, []);
 
-    // 最小間隔チェック
-    if (currentTime - lastTranslationTime.current < MIN_TRANSLATION_INTERVAL) {
-      translationQueue.current.push(text);
-      return;
-    }
+  const clearConversation = useCallback(() => {
+    setMessages([]);
+  }, []);
 
-    try {
-      const response = await fetch('/api/translate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, targetLanguage }),
-      });
+  // デバウンスされた翻訳処理
+  const debouncedTranslate = useMemo(
+    () =>
+      debounce(async (text: string, isFinal: boolean) => {
+        try {
+          const response = await fetch('/api/translate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text, targetLanguage }),
+          });
 
-      if (!response.ok) throw new Error('Translation failed');
+          if (!response.ok) {
+            throw new Error('Translation API request failed');
+          }
 
-      const data = await response.json();
-      lastTranslationTime.current = currentTime;
+          const data = await response.json();
+          const translationMessage: Message = {
+            type: 'translation',
+            content: data.translation,
+            timestamp: Date.now(),
+            isFinal,
+            status: 'api',
+          };
+          addMessage(translationMessage);
+        } catch (error) {
+          console.error('Translation error:', error);
+          setError('翻訳エラーが発生しました。');
+        }
+      }, updateInterval),
+    [targetLanguage, addMessage, updateInterval]
+  );
 
-      setMessages(prev => [...prev, {
-        type: 'translation',
-        content: data.translation,
-        timestamp: currentTime,
-        isFinal,
-        status: 'api'
-      }]);
+  const processTranscript = useCallback(
+    async (transcript: string, isFinal: boolean) => {
+      if (transcript.trim()) {
+        const newMessage: Message = {
+          type: 'transcript',
+          content: transcript,
+          timestamp: Date.now(),
+          isFinal,
+        };
+        addMessage(newMessage);
 
-      // キューの処理
-      if (translationQueue.current.length > 0) {
-        const nextText = translationQueue.current.pop();
-        if (nextText) processTranslation(nextText, false);
-        translationQueue.current = []; // 古いキューをクリア
+        // インテリジェントな区切り処理
+        const shouldTranslate = 
+          isFinal || 
+          transcript.includes('。') || 
+          transcript.includes('、') ||
+          transcript.includes('？') ||
+          transcript.includes('！') ||
+          transcript.length > 22;// 任意の文字数
+
+        if (shouldTranslate) {
+          debouncedTranslate(transcript, isFinal);
+        }
       }
-    } catch (error) {
-      console.error('Translation error:', error);
-      setError('翻訳エラーが発生しました。');
-    }
-  }, [targetLanguage]);
-
-  const processTranscript = useCallback((transcript: string, isFinal: boolean) => {
-    if (!transcript.trim()) return;
-
-    // 新しい文章の認識
-    setMessages(prev => [...prev, {
-      type: 'transcript',
-      content: transcript,
-      timestamp: Date.now(),
-      isFinal
-    }]);
-
-    // インテリジェントな区切り処理の最適化
-    const shouldTranslate = 
-      isFinal || 
-      transcript.includes('。') || 
-      transcript.includes('、') ||
-      transcript.includes('？') ||
-      transcript.includes('！') ||
-      transcript.length > 15 || // 文字数制限を短く
-      transcript.match(/[.!?]$/); // 英語の文末判定
-
-    if (shouldTranslate) {
-      processTranslation(transcript, isFinal);
-    }
-  }, [processTranslation]);
+    },
+    [addMessage, debouncedTranslate]
+  );
 
   const startListening = useCallback(() => {
     if (recognitionRef.current) {
@@ -159,7 +157,7 @@ export function useAudioProcessing(
     const recognition = new SpeechRecognition();
     recognition.lang = 'ja-JP';
     recognition.continuous = true;
-    recognition.interimResults = true;
+    recognition.interimResults = true;// これにより途中結果も取得できます
 
     recognition.onstart = () => {
       setIsListening(true);
@@ -236,20 +234,11 @@ export function useAudioProcessing(
     }
   }, []);
 
-  const clearConversation = useCallback(() => {
-    setMessages([]);
-  }, []);
-
   useEffect(() => {
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
+      debouncedTranslate.cancel();
     };
-  }, []);
+  }, [debouncedTranslate]);
 
   return {
     isListening,
@@ -260,6 +249,5 @@ export function useAudioProcessing(
     error,
     performanceMetrics,
     currentVolume,
-    translationQueueSize: translationQueue.current.length
   };
 }
