@@ -190,26 +190,24 @@ export default function SimultaneousInterpretationSystem() {
 return (
   <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
     <div className="max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center">
-          <Image
-            src="/assets/logo/lifesupport-icon-512x512.png"
-            alt="Life Support Icon"
-            width={48}
-            height={48}
-            priority
-            className="h-12 w-auto"
-          />
-          <div className="ml-4">
-            <h1 className="text-3xl font-bold">
-              EarthSync
-              <div className="h-1 w-24 bg-blue-500 mt-2"></div>
-            </h1>
-            <p className="text-gray-600">
-              71の言語で紡ぐ、ひとつの地球。<br />
-              言葉を超えて、想いをシンクする。
-            </p>
-          </div>
+      <div className="flex mb-8">
+        <Image
+          src="/assets/logo/lifesupport-icon-512x512.png"
+          alt="Life Support Icon"
+          width={96}
+          height={96}
+          priority
+          className="h-24 w-auto"
+        />
+        <div className="flex-1 text-center">
+          <h1 className="text-3xl font-bold mb-2">
+            EarthSync
+            <div className="h-1 w-24 bg-blue-500 mx-auto mt-2"></div>
+          </h1>
+          <p className="text-center text-gray-600">
+            71の言語で紡ぐ、ひとつの地球。<br />
+            言葉を超えて、想いをシンクする。
+          </p>
         </div>
       </div>
 
