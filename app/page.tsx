@@ -219,7 +219,7 @@ export default function SimultaneousInterpretationSystem() {
           </h1>
           <p className="text-center text-gray-600">
             ７１の言語と７６億の話者を紡ぐ。ひとつの地球。<br />
-            あなたの想いをシンクロする。
+            貴方の言葉が地球上の人とシンクする。
           </p>
         </div>
       </div>
