@@ -525,7 +525,7 @@ export default function SimultaneousInterpretationSystem() {
       </div>
     ))}
     {transcriptMessages.length === 0 && (
-      <p className="text-gray-600">まだメッセージはありません。話し始めると音声認識結果が表示されます。</p>
+      <p className="text-gray-600">「出力翻訳言語」ボタンを押すと音声認識結果が表示されます。まだメッセージはありません。</p>
     )}
     <div ref={japaneseMessagesEndRef} />
   </div>
@@ -546,7 +546,7 @@ export default function SimultaneousInterpretationSystem() {
       ))}
       {translationMessages.length === 0 && (
         <p className={`text-gray-600 ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}>
-          まだ翻訳結果はありません。音声認識が開始されると翻訳結果が表示されます。
+          「出力翻訳言語」ボタンを押すと音声認識結果が表示されます。まだ翻訳結果はありません。
         </p>
       )}
       <div ref={translatedMessagesEndRef} />
