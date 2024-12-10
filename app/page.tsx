@@ -96,18 +96,24 @@ export default function SimultaneousInterpretationSystem() {
   const getLanguageDisplay = (langCode: string): string => {
     switch (langCode) {
       // 東アジア
+      case 'ja': return '日本語';  // 追加
+      case 'ja-JP': return '日本語';  // 追加（入力言語用）
       case 'en': return '英語';
+      case 'en-US': return '英語';  // 追加（入力言語用）
       case 'zh': return '中国語（簡体字）';
       case 'zh-HK': return '広東語（繁体字）';
       case 'zh-TW': return '台湾中国語（繁体字）';
       case 'ko': return '韓国語';
+      case 'ko-KR': return '韓国語';  // 追加（入力言語用）
       case 'mo': return 'モンゴル語';
 
       // 東南アジア
       case 'vi': return 'ベトナム語';
       case 'th': return 'タイ語';
+      case 'th-TH': return 'タイ語';  // 追加（入力言語用）
       case 'ms': return 'マレー語';
       case 'id': return 'インドネシア語';
+      case 'id-ID': return 'インドネシア語';  // 追加（入力言語用）
       case 'fil': return 'フィリピン語';
       case 'my': return 'ミャンマー語';
       case 'km': return 'クメール語';
@@ -211,22 +217,31 @@ return (
           </p>
         </div>
       </div>
- 
+
       <div className="bg-white shadow-md rounded-lg p-6 mb-6">
         <div className="flex flex-col gap-4">
           {/* 1行目：開始ボタンと翻訳言語選択 */}
           <div className="flex items-center justify-between">
-            <Button 
-              onClick={toggleListening}
-              variant={isListening ? "destructive" : "default"}
-            >
-              {isListening ? '停止' : '同時通訳開始'}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                onClick={toggleListening}
+                variant={isListening ? "destructive" : "default"}
+              >
+                {isListening ? '停止' : '同時通訳開始'}
+              </Button>
+              <Button 
+                variant="secondary"
+              >
+                <span className="mr-2">🇯🇵</span>
+                入力言語切替
+              </Button>
+            </div>
             <Select value={targetLanguage} onValueChange={setTargetLanguage}>
               <SelectTrigger>
                 <SelectValue placeholder="言語を選択" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="ja">日本語</SelectItem>
                 <SelectItem value="en">英語</SelectItem>
                 <SelectItem value="zh">中国語（簡体字）</SelectItem>
                 <SelectItem value="zh-HK">広東語（繁体字）</SelectItem>
@@ -299,7 +314,7 @@ return (
               </SelectContent>
             </Select>
           </div>
- 
+
           {/* 2行目：入力言語の国旗ボタン */}
           <div className="flex justify-center gap-2">
             <button
@@ -394,7 +409,7 @@ return (
               🇮🇩
             </button>
           </div>
- 
+
           {/* 3行目：表示切り替えボタン類 */}
           <div className="flex justify-center gap-4 items-center">
             {renderLayoutButtons()}
