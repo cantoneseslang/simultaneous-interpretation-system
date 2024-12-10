@@ -96,30 +96,30 @@ export default function SimultaneousInterpretationSystem() {
   const getLanguageDisplay = (langCode: string): string => {
     switch (langCode) {
       // 東アジア
-      case 'ja': return '日本語';  // 追加
-      case 'ja-JP': return '日本語';  // 追加（入力言語用）
+      case 'ja': return '日本語';
+      case 'ja-JP': return '日本語';
       case 'en': return '英語';
-      case 'en-US': return '英語';  // 追加（入力言語用）
+      case 'en-US': return '英語';
       case 'zh': return '中国語（簡体字）';
       case 'zh-HK': return '広東語（繁体字）';
       case 'zh-TW': return '台湾中国語（繁体字）';
       case 'ko': return '韓国語';
-      case 'ko-KR': return '韓国語';  // 追加（入力言語用）
+      case 'ko-KR': return '韓国語';
       case 'mo': return 'モンゴル語';
-
+ 
       // 東南アジア
       case 'vi': return 'ベトナム語';
       case 'th': return 'タイ語';
-      case 'th-TH': return 'タイ語';  // 追加（入力言語用）
+      case 'th-TH': return 'タイ語';
       case 'ms': return 'マレー語';
       case 'id': return 'インドネシア語';
-      case 'id-ID': return 'インドネシア語';  // 追加（入力言語用）
+      case 'id-ID': return 'インドネシア語';
       case 'fil': return 'フィリピン語';
       case 'my': return 'ミャンマー語';
       case 'km': return 'クメール語';
       case 'lo': return 'ラオ語';
       case 'tl': return 'タガログ語';
-
+ 
       // 南アジア
       case 'hi': return 'ヒンディー語';
       case 'bn': return 'ベンガル語';
@@ -133,7 +133,7 @@ export default function SimultaneousInterpretationSystem() {
       case 'pa': return 'パンジャーブ語';
       case 'or': return 'オリヤー語';
       case 'si': return 'シンハラ語';
-
+ 
       // 西欧
       case 'fr': return 'フランス語';
       case 'de': return 'ドイツ語';
@@ -141,14 +141,14 @@ export default function SimultaneousInterpretationSystem() {
       case 'it': return 'イタリア語';
       case 'pt': return 'ポルトガル語';
       case 'nl': return 'オランダ語';
-
+ 
       // 北欧
       case 'sv': return 'スウェーデン語';
       case 'da': return 'デンマーク語';
       case 'no': return 'ノルウェー語';
       case 'fi': return 'フィンランド語';
       case 'is': return 'アイスランド語';
-
+ 
       // 東欧
       case 'ru': return 'ロシア語';
       case 'pl': return 'ポーランド語';
@@ -164,12 +164,12 @@ export default function SimultaneousInterpretationSystem() {
       case 'lt': return 'リトアニア語';
       case 'lv': return 'ラトビア語';
       case 'et': return 'エストニア語';
-
+ 
       // その他ヨーロッパ
       case 'el': return 'ギリシャ語';
       case 'tr': return 'トルコ語';
       case 'ka': return 'グルジア語';
-
+ 
       // 中東
       case 'ar': return 'アラビア語';
       case 'he': return 'ヘブライ語';
@@ -177,7 +177,7 @@ export default function SimultaneousInterpretationSystem() {
       case 'ku': return 'クルド語';
       case 'am': return 'アムハラ語';
       case 'yi': return 'イディッシュ語';
-
+ 
       // アフリカ
       case 'sw': return 'スワヒリ語';
       case 'zu': return 'ズールー語';
@@ -186,15 +186,15 @@ export default function SimultaneousInterpretationSystem() {
       case 'ha': return 'ハウサ語';
       case 'ig': return 'イボ語';
       case 'yo': return 'ヨルバ語';
-
+ 
       // 国際補助言語
       case 'eo': return 'エスペラント語';
-
+ 
       default: return 'その他';
     }
-};
-
-return (
+ };
+ 
+ return (
   <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
     <div className="max-w-6xl mx-auto">
       <div className="flex mb-8">
@@ -217,25 +217,17 @@ return (
           </p>
         </div>
       </div>
-
+ 
       <div className="bg-white shadow-md rounded-lg p-6 mb-6">
         <div className="flex flex-col gap-4">
           {/* 1行目：開始ボタンと翻訳言語選択 */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Button 
-                onClick={toggleListening}
-                variant={isListening ? "destructive" : "default"}
-              >
-                {isListening ? '停止' : '同時通訳開始'}
-              </Button>
-              <Button 
-                variant="secondary"
-              >
-                <span className="mr-2">🇯🇵</span>
-                入力言語切替
-              </Button>
-            </div>
+            <Button 
+              onClick={toggleListening}
+              variant={isListening ? "destructive" : "default"}
+            >
+              {isListening ? '停止' : '同時通訳開始'}
+            </Button>
             <Select value={targetLanguage} onValueChange={setTargetLanguage}>
               <SelectTrigger>
                 <SelectValue placeholder="言語を選択" />
@@ -314,8 +306,14 @@ return (
               </SelectContent>
             </Select>
           </div>
-
-          {/* 2行目：入力言語の国旗ボタン */}
+ 
+          {/* 2行目：入力言語切替ボタン（表示のみ）と国旗ボタン */}
+          <div className="flex items-center gap-2">
+            <Button variant="secondary" className="pointer-events-none">
+              <span className="mr-2">🇯🇵</span>
+              入力言語切替
+            </Button>
+          </div>
           <div className="flex justify-center gap-2">
             <button
               onClick={() => setInputLanguage('ja-JP')}
@@ -394,19 +392,6 @@ return (
               `}
             >
               🇹🇭
-            </button>
-            <button
-              onClick={() => setInputLanguage('id-ID')}
-              className={`
-                w-8 h-8 
-                flex items-center justify-center 
-                rounded-md 
-                transition-colors
-                ${inputLanguage === 'id-ID' ? 'bg-accent' : 'hover:bg-accent/50'}
-                text-lg
-              `}
-            >
-              🇮🇩
             </button>
           </div>
 
