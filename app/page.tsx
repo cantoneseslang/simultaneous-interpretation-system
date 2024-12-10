@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useMemo } from 'react'
+import Image from 'next/image'
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
@@ -189,15 +190,27 @@ export default function SimultaneousInterpretationSystem() {
 return (
   <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
     <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2">
-          EarthSync
-          <div className="h-1 w-24 bg-blue-500 mx-auto mt-2"></div>
-        </h1>
-        <p className="text-center text-gray-600">
-          71の言語で紡ぐ、ひとつの地球。<br />
-          言葉を超えて、想いをシンクする。
-        </p>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center">
+          <Image
+            src="/assets/logo/lifesupport-icon-512x512.png"
+            alt="Life Support Icon"
+            width={48}
+            height={48}
+            priority
+            className="h-12 w-auto"
+          />
+          <div className="ml-4">
+            <h1 className="text-3xl font-bold">
+              EarthSync
+              <div className="h-1 w-24 bg-blue-500 mt-2"></div>
+            </h1>
+            <p className="text-gray-600">
+              71の言語で紡ぐ、ひとつの地球。<br />
+              言葉を超えて、想いをシンクする。
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="bg-white shadow-md rounded-lg p-6 mb-6">
