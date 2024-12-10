@@ -356,26 +356,26 @@ return (
 </div>
 
 {layoutMode === 'vertical' ? (
-<div className="bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
-<h2 className="text-xl font-semibold mb-4">メッセージ</h2>
-<div className="space-y-4">
-  {transcriptMessages.map((message, index) => (
-    <div key={`message-${message.timestamp}`} className="space-y-2">
-      <div className="p-3 rounded-lg bg-green-100">
-        <p>日本語：{message.content}</p>
-      </div>
-      {translationMessages[index] && (
-        <div className={`p-3 rounded-lg ${translationMessages[index].status === 'api' ? 'bg-blue-100' : 'bg-yellow-100'}`}>
-          <p>翻訳（{getLanguageDisplay(targetLanguage)}）：{translationMessages[index].content}</p>
-          <p className="text-xs text-gray-500 mt-1">
-            {translationMessages[index].status === 'api' ? '翻訳' : 'フォールバック翻訳'}
-          </p>
+  <div className="bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
+    <h2 className="text-xl font-semibold mb-4">メッセージ</h2>
+    <div className="space-y-4">
+      {transcriptMessages.map((message, index) => (
+        <div key={`message-${message.timestamp}`} className="space-y-2">
+          <div className="p-3 rounded-lg bg-green-100">
+            <p>{message.content}</p>  {/* 「日本語：」を削除 */}
+          </div>
+          {translationMessages[index] && (
+            <div className={`p-3 rounded-lg ${translationMessages[index].status === 'api' ? 'bg-blue-100' : 'bg-yellow-100'}`}>
+              <p>{translationMessages[index].content}</p>  {/* 「翻訳（言語名）：」を削除 */}
+              <p className="text-xs text-gray-500 mt-1">
+                {translationMessages[index].status === 'api' ? '翻訳' : 'フォールバック翻訳'}
+              </p>
+            </div>
+          )}
         </div>
-      )}
+      ))}
     </div>
-  ))}
-</div>
-</div>
+  </div>
 ) : layoutMode === 'translation-only' ? (
 <div className="bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
 <h2 className="text-xl font-semibold mb-4">翻訳 ({getLanguageDisplay(targetLanguage)})</h2>
