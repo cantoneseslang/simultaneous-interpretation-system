@@ -10,6 +10,7 @@ import { Settings2, LayoutListIcon as LayoutSideBySide, LayoutGridIcon as Layout
 import { useAudioProcessing } from './hooks/useAudioProcessing'
 import { VolumeGauge } from './components/VolumeGauge'
 import Link from 'next/link'
+import Loader from './components/ui/Loader';
 
 type LayoutMode = 'side-by-side' | 'vertical' | 'inverse' | 'translation-only';
 
@@ -201,16 +202,16 @@ export default function SimultaneousInterpretationSystem() {
   <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
     <div className="max-w-6xl mx-auto">
       <div className="flex mb-8">
-      <Link href="https://lshk-ai-service.studio.site/">
-  <Image
-    src="/assets/logo/lifesupport-icon-512x512.png"
-    alt="Life Support Icon"
-    width={64}
-    height={64}
-    priority
-    className="h-24 w-auto hover:opacity-80 transition-opacity"
-  />
-</Link>
+        <Link href="https://lshk-ai-service.studio.site/">
+          <Image
+            src="/assets/logo/lifesupport-icon-512x512.png"
+            alt="Life Support Icon"
+            width={64}
+            height={64}
+            priority
+            className="h-24 w-auto hover:opacity-80 transition-opacity"
+          />
+        </Link>
 
         <div className="flex-1 text-center">
           <h1 className="text-3xl font-bold mb-2">
@@ -318,11 +319,11 @@ export default function SimultaneousInterpretationSystem() {
 
           {/* 2行目：出力翻訳言語選択と同時通訳開始ボタン */}
           <div className="flex items-center justify-between">
-            <Button 
+            <Button
               onClick={toggleListening}
               variant={isListening ? "destructive" : "default"}
             >
-              {isListening ? '停止' : '出力翻訳言語'}
+              {isListening ? "停止" : "出力翻訳言語"}
             </Button>
             <Select value={targetLanguage} onValueChange={setTargetLanguage}>
               <SelectTrigger>

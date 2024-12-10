@@ -94,7 +94,6 @@ export function useAudioProcessing(
   const debouncedTranslate = useMemo(
     () =>
       debounce(async (text: string, isFinal: boolean) => {
-        // 前回翻訳したテキストと同じ場合は翻訳しない
         if (text.trim() === lastTranslatedTextRef.current.trim()) {
           return;
         }
@@ -122,7 +121,6 @@ export function useAudioProcessing(
           };
           addMessage(translationMessage);
           
-          // 翻訳したテキストを保存
           lastTranslatedTextRef.current = text;
         } catch (error) {
           console.error('Translation error:', error);
@@ -143,12 +141,11 @@ export function useAudioProcessing(
         };
         addMessage(newMessage);
 
-        // 翻訳のタイミングを最適化
         const shouldTranslate = 
-          (isFinal && transcript.length > 0) || // 最終結果の場合は必ず翻訳
-          (!isFinal && ( // 中間結果の場合は以下の条件で翻訳
-            (transcript.includes('。') && transcript.length > lastTranslatedTextRef.current.length) || // 文が完成し、前回より長くなった
-            (transcript.length > lastTranslatedTextRef.current.length + 20) // 前回の翻訳から20文字以上増えた
+          (isFinal && transcript.length > 0) || 
+          (!isFinal && (
+            (transcript.includes('。') && transcript.length > lastTranslatedTextRef.current.length) ||
+            (transcript.length > lastTranslatedTextRef.current.length + 20)
           ));
 
         if (shouldTranslate) {
@@ -272,7 +269,6 @@ export function useAudioProcessing(
       analyserRef.current = null;
       dataArrayRef.current = null;
     }
-    // リセット時に最後の翻訳テキストもクリア
     lastTranslatedTextRef.current = '';
   }, []);
 
