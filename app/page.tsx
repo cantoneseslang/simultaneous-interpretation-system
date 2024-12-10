@@ -515,7 +515,7 @@ export default function SimultaneousInterpretationSystem() {
 ) : (
 <div className="flex space-x-4">
 <div className="w-1/2 bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
-  <h2 className="text-xl font-semibold mb-4">日本語</h2>
+  <h2 className="text-xl font-semibold mb-4">{getLanguageDisplay(inputLanguage)}</h2>
   <div className="space-y-4">
     {transcriptMessages.map((message) => (
       <div key={message.timestamp} className="p-3 rounded-lg bg-green-100">
