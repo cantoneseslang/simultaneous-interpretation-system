@@ -13,6 +13,7 @@ import { VolumeGauge } from './components/VolumeGauge'
 type LayoutMode = 'side-by-side' | 'vertical' | 'inverse' | 'translation-only';
 
 export default function SimultaneousInterpretationSystem() {
+  const [inputLanguage, setInputLanguage] = useState('ja-JP')  // 追加
   const [targetLanguage, setTargetLanguage] = useState('en')
   const [useLocalProcessing, setUseLocalProcessing] = useState(true)
   const [updateInterval, setUpdateInterval] = useState(100)
@@ -31,7 +32,7 @@ export default function SimultaneousInterpretationSystem() {
     currentVolume,
     error,
     performanceMetrics
-  } = useAudioProcessing(targetLanguage, useLocalProcessing, updateInterval, voiceThreshold)
+  } = useAudioProcessing(inputLanguage, targetLanguage, useLocalProcessing, updateInterval, voiceThreshold)  // inputLanguageを追加
 
   const toggleListening = () => {
     if (isListening) {
@@ -213,18 +214,101 @@ return (
 
       <div className="bg-white shadow-md rounded-lg p-6 mb-6">
         <div className="flex flex-col gap-4">
-          {/* 上段：開始ボタンと言語選択のみ */}
-          <div className="flex justify-between items-center">
+          {/* 上段：開始ボタン、言語入力切り替え、言語選択 */}
+          <div className="flex items-center gap-4">
             <Button 
               onClick={toggleListening}
               variant={isListening ? "destructive" : "default"}
             >
               {isListening ? '停止' : '同時通訳開始'}
             </Button>
-          <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-            <SelectTrigger>
-              <SelectValue placeholder="言語を選択" />
-            </SelectTrigger>
+
+            {/* 新しく追加する言語入力切り替えボタン群 */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setInputLanguage('ja-JP')}
+                className={`
+                  w-8 h-8 
+                  flex items-center justify-center 
+                  rounded-md 
+                  transition-colors
+                  ${inputLanguage === 'ja-JP' ? 'bg-accent' : 'hover:bg-accent/50'}
+                  text-lg
+                `}
+              >
+                🇯🇵
+              </button>
+              <button
+                onClick={() => setInputLanguage('en-US')}
+                className={`
+                  w-8 h-8 
+                  flex items-center justify-center 
+                  rounded-md 
+                  transition-colors
+                  ${inputLanguage === 'en-US' ? 'bg-accent' : 'hover:bg-accent/50'}
+                  text-lg
+                `}
+              >
+                🇺🇸
+              </button>
+              <button
+                onClick={() => setInputLanguage('zh-CN')}
+                className={`
+                  w-8 h-8 
+                  flex items-center justify-center 
+                  rounded-md 
+                  transition-colors
+                  ${inputLanguage === 'zh-CN' ? 'bg-accent' : 'hover:bg-accent/50'}
+                  text-lg
+                `}
+              >
+                🇨🇳
+              </button>
+              <button
+                onClick={() => setInputLanguage('ko-KR')}
+                className={`
+                  w-8 h-8 
+                  flex items-center justify-center 
+                  rounded-md 
+                  transition-colors
+                  ${inputLanguage === 'ko-KR' ? 'bg-accent' : 'hover:bg-accent/50'}
+                  text-lg
+                `}
+              >
+                🇰🇷
+              </button>
+              <button
+                onClick={() => setInputLanguage('th-TH')}
+                className={`
+                  w-8 h-8 
+                  flex items-center justify-center 
+                  rounded-md 
+                  transition-colors
+                  ${inputLanguage === 'th-TH' ? 'bg-accent' : 'hover:bg-accent/50'}
+                  text-lg
+                `}
+              >
+                🇹🇭
+              </button>
+              <button
+                onClick={() => setInputLanguage('id-ID')}
+                className={`
+                  w-8 h-8 
+                  flex items-center justify-center 
+                  rounded-md 
+                  transition-colors
+                  ${inputLanguage === 'id-ID' ? 'bg-accent' : 'hover:bg-accent/50'}
+                  text-lg
+                `}
+              >
+                🇮🇩
+              </button>
+            </div>
+
+            <Select value={targetLanguage} onValueChange={setTargetLanguage}>
+              <SelectTrigger>
+                <SelectValue placeholder="言語を選択" />
+              </SelectTrigger>
             <SelectContent>
           <SelectItem value="en">英語</SelectItem>
           <SelectItem value="zh">中国語（簡体字）</SelectItem>

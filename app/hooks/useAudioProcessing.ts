@@ -52,6 +52,7 @@ declare global {
 }
 
 export function useAudioProcessing(
+  inputLanguage: string,
   targetLanguage: string,
   useLocalProcessing: boolean,
   updateInterval: number,
@@ -153,7 +154,7 @@ export function useAudioProcessing(
     }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = 'ja-JP';
+    recognition.lang = inputLanguage;
     recognition.continuous = true;
     recognition.interimResults = true;
 
@@ -235,7 +236,7 @@ export function useAudioProcessing(
       console.error('Recognition start error:', error);
       setError('音声認識の開始に失敗しました。');
     }
-  }, [processTranscript]);
+  }, [processTranscript, inputLanguage]);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
