@@ -9,6 +9,7 @@ import { Slider } from "@/components/ui/slider"
 import { Settings2, LayoutListIcon as LayoutSideBySide, LayoutGridIcon as LayoutVertical, RotateCcw, Maximize2 } from 'lucide-react'
 import { useAudioProcessing } from './hooks/useAudioProcessing'
 import { VolumeGauge } from './components/VolumeGauge'
+import Link from 'next/link'
 
 type LayoutMode = 'side-by-side' | 'vertical' | 'inverse' | 'translation-only';
 
@@ -200,14 +201,17 @@ export default function SimultaneousInterpretationSystem() {
   <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
     <div className="max-w-6xl mx-auto">
       <div className="flex mb-8">
-        <Image
-          src="/assets/logo/lifesupport-icon-512x512.png"
-          alt="Life Support Icon"
-          width={96}
-          height={96}
-          priority
-          className="h-24 w-auto"
-        />
+      <Link href="https://lshk-ai-service.studio.site/">
+  <Image
+    src="/assets/logo/lifesupport-icon-512x512.png"
+    alt="Life Support Icon"
+    width={64}
+    height={64}
+    priority
+    className="h-24 w-auto hover:opacity-80 transition-opacity"
+  />
+</Link>
+
         <div className="flex-1 text-center">
           <h1 className="text-3xl font-bold mb-2">
             EarthSync
