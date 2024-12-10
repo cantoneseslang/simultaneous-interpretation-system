@@ -71,6 +71,7 @@ export function useAudioProcessing(
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
+  const lastTranslatedTextRef = useRef<string>('');
 
   const getAdjustedLanguageCode = (code: string) => {
     if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
@@ -87,11 +88,17 @@ export function useAudioProcessing(
 
   const clearConversation = useCallback(() => {
     setMessages([]);
+    lastTranslatedTextRef.current = '';
   }, []);
 
   const debouncedTranslate = useMemo(
     () =>
       debounce(async (text: string, isFinal: boolean) => {
+        // 前回翻訳したテキストと同じ場合は翻訳しない
+        if (text.trim() === lastTranslatedTextRef.current.trim()) {
+          return;
+        }
+
         try {
           const response = await fetch('/api/translate', {
             method: 'POST',
@@ -114,6 +121,9 @@ export function useAudioProcessing(
             status: 'api',
           };
           addMessage(translationMessage);
+          
+          // 翻訳したテキストを保存
+          lastTranslatedTextRef.current = text;
         } catch (error) {
           console.error('Translation error:', error);
           setError('翻訳エラーが発生しました。');
@@ -133,13 +143,13 @@ export function useAudioProcessing(
         };
         addMessage(newMessage);
 
+        // 翻訳のタイミングを最適化
         const shouldTranslate = 
-          isFinal || 
-          transcript.includes('。') || 
-          transcript.includes('、') ||
-          transcript.includes('？') ||
-          transcript.includes('！') ||
-          transcript.length > 22;
+          (isFinal && transcript.length > 0) || // 最終結果の場合は必ず翻訳
+          (!isFinal && ( // 中間結果の場合は以下の条件で翻訳
+            (transcript.includes('。') && transcript.length > lastTranslatedTextRef.current.length) || // 文が完成し、前回より長くなった
+            (transcript.length > lastTranslatedTextRef.current.length + 20) // 前回の翻訳から20文字以上増えた
+          ));
 
         if (shouldTranslate) {
           debouncedTranslate(transcript, isFinal);
@@ -163,7 +173,7 @@ export function useAudioProcessing(
     }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = getAdjustedLanguageCode(inputLanguage);  // 変更箇所
+    recognition.lang = getAdjustedLanguageCode(inputLanguage);
     recognition.continuous = true;
     recognition.interimResults = true;
 
@@ -186,29 +196,32 @@ export function useAudioProcessing(
         audioContextRef.current = audioContext;
     
         navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-          console.log('Audio stream obtained:', stream);
-          const source = audioContext.createMediaStreamSource(stream);
-          source.connect(analyser);
-          console.log('Audio source connected to analyser');
-          
-          const updateVolume = () => {
-            if (analyserRef.current && dataArrayRef.current) {
-              analyserRef.current.getByteFrequencyData(dataArrayRef.current);
+          if (audioContextRef.current) {
+            const source = audioContextRef.current.createMediaStreamSource(stream);
+            if (analyserRef.current) {
+              source.connect(analyserRef.current);
               
-              let sum = 0;
-              const data = dataArrayRef.current;
-              for (let i = 0; i < bufferLength; i++) {
-                sum += data[i] * data[i];
-              }
-              const rms = Math.sqrt(sum / bufferLength);
-              const normalizedVolume = Math.min(rms / 256, 1);
-              
-              console.log('Raw RMS:', rms, 'Normalized Volume:', normalizedVolume);
-              setCurrentVolume(normalizedVolume);
+              const updateVolume = () => {
+                if (analyserRef.current && dataArrayRef.current) {
+                  analyserRef.current.getByteFrequencyData(dataArrayRef.current);
+                  
+                  let sum = 0;
+                  const data = dataArrayRef.current;
+                  for (let i = 0; i < bufferLength; i++) {
+                    sum += data[i] * data[i];
+                  }
+                  const rms = Math.sqrt(sum / bufferLength);
+                  const normalizedVolume = Math.min(rms / 256, 1);
+                  
+                  setCurrentVolume(normalizedVolume);
+                }
+                if (isListening) {
+                  requestAnimationFrame(updateVolume);
+                }
+              };
+              updateVolume();
             }
-            requestAnimationFrame(updateVolume);
-          };
-          updateVolume();
+          }
         }).catch(error => {
           console.error('Error getting audio stream:', error);
           setError('マイクの接続に失敗しました。');
@@ -245,7 +258,7 @@ export function useAudioProcessing(
       console.error('Recognition start error:', error);
       setError('音声認識の開始に失敗しました。');
     }
-  }, [processTranscript, inputLanguage]);
+  }, [processTranscript, inputLanguage, isListening]);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
@@ -259,13 +272,16 @@ export function useAudioProcessing(
       analyserRef.current = null;
       dataArrayRef.current = null;
     }
+    // リセット時に最後の翻訳テキストもクリア
+    lastTranslatedTextRef.current = '';
   }, []);
 
   useEffect(() => {
     return () => {
       debouncedTranslate.cancel();
+      stopListening();
     };
-  }, [debouncedTranslate]);
+  }, [debouncedTranslate, stopListening]);
 
   return {
     isListening,
