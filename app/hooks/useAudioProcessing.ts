@@ -94,6 +94,7 @@ export function useAudioProcessing(
   const debouncedTranslate = useMemo(
     () =>
       debounce(async (text: string, isFinal: boolean) => {
+        // 最後の翻訳と同じ内容なら処理しない
         if (text.trim() === lastTranslatedTextRef.current.trim()) {
           return;
         }
@@ -112,16 +113,19 @@ export function useAudioProcessing(
           }
 
           const data = await response.json();
-          const translationMessage: Message = {
-            type: 'translation',
-            content: data.translation,
-            timestamp: Date.now(),
-            isFinal,
-            status: 'api',
-          };
-          addMessage(translationMessage);
           
-          lastTranslatedTextRef.current = text;
+          // isFinalがtrueの場合のみメッセージを追加
+          if (isFinal) {
+            const translationMessage: Message = {
+              type: 'translation',
+              content: data.translation,
+              timestamp: Date.now(),
+              isFinal: true,
+              status: 'api',
+            };
+            addMessage(translationMessage);
+            lastTranslatedTextRef.current = text;
+          }
         } catch (error) {
           console.error('Translation error:', error);
           setError('翻訳エラーが発生しました。');
@@ -133,6 +137,7 @@ export function useAudioProcessing(
   const processTranscript = useCallback(
     async (transcript: string, isFinal: boolean) => {
       if (transcript.trim()) {
+        // 音声入力メッセージは常に表示（interim/final両方）
         const newMessage: Message = {
           type: 'transcript',
           content: transcript,
@@ -141,15 +146,9 @@ export function useAudioProcessing(
         };
         addMessage(newMessage);
 
-        const shouldTranslate = 
-          (isFinal && transcript.length > 0) || 
-          (!isFinal && (
-            (transcript.includes('。') && transcript.length > lastTranslatedTextRef.current.length) ||
-            (transcript.length > lastTranslatedTextRef.current.length + 20)
-          ));
-
-        if (shouldTranslate) {
-          debouncedTranslate(transcript, isFinal);
+        // 翻訳は完全に音声入力が終わった時のみ実行
+        if (isFinal && transcript.length > 0) {
+          debouncedTranslate(transcript, true);
         }
       }
     },
