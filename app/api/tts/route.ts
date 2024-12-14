@@ -34,9 +34,18 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('TTS Error:', error);
 
-    // Return a more detailed error message for debugging purposes
+    // Return detailed error information for debugging
     return NextResponse.json(
-      { error: 'TTS処理に失敗しました', details: error.message },
+      {
+        error: 'TTS処理に失敗しました',
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        stack: error.stack,
+        statusDetails: error.statusDetails,
+        metadata: error.metadata,
+        errors: error.errors,
+      },
       { status: 500 }
     );
   }
