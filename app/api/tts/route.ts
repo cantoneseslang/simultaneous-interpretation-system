@@ -4,9 +4,13 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   const { text, language, voiceConfig } = await req.json();
-  
-  const client = new TextToSpeechClient();
-  
+
+  // Initialize the client with credentials from environment variable
+  const client = new TextToSpeechClient({
+    credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS || '{}'),
+    projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
+  });
+
   try {
     const [response] = await client.synthesizeSpeech({
       input: { text },
@@ -15,11 +19,11 @@ export async function POST(req: Request) {
         ssmlGender: voiceConfig.gender,
       },
       audioConfig: {
-        audioEncoding: 'MP3'
+        audioEncoding: 'MP3',
       },
     });
 
-    return new Response(response.audioContent, {
+    return new Response(response.audioContent as any, {
       headers: {
         'Content-Type': 'audio/mpeg',
       },
