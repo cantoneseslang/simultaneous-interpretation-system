@@ -86,11 +86,9 @@ export function useAudioProcessing(
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
   const lastTranslatedTextRef = useRef<string>('');
-  const speechSynthesisRef = useRef<SpeechSynthesis | null>(null);
-  const currentUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const getAdjustedLanguageCode = (code: string) => {
-    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+    if (typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
       if (code === 'yue-HK') {
         return 'zh-HK';
       }
@@ -98,85 +96,54 @@ export function useAudioProcessing(
     return code;
   };
 
-  const getTtsVoice = useCallback((lang: string, gender: 'MALE' | 'FEMALE') => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) {
-      return null;
-    }
-    const voices = window.speechSynthesis.getVoices();
-
-    if (!voices) return null;
-
-    const filteredVoices = voices.filter(voice => {
-      const langMatch = voice.lang.startsWith(lang);
-      const genderMatch =
-        gender === 'FEMALE'
-          ? voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('woman')
-          : voice.name.toLowerCase().includes('male') || voice.name.toLowerCase().includes('man');
-      return langMatch && genderMatch;
-    });
-
-    if (filteredVoices.length === 0) {
-      return voices.find(voice => voice.lang.startsWith(lang)) || null;
-    }
-
-    return filteredVoices[0];
-  }, []);
-
   const speakText = useCallback(
-    (text: string, lang: string, gender: 'MALE' | 'FEMALE') => {
+    async (text: string, lang: string, gender: 'MALE' | 'FEMALE') => {
       if (!ttsConfig.enabled || !text || !lang) {
         return;
       }
 
-      const voice = getTtsVoice(lang, gender);
-
-      if (!voice && lang === 'ja') {
-        return;
-      }
-      if (speechSynthesisRef.current === null) {
-        if (typeof window === 'undefined' || !window.speechSynthesis) return;
-
-        speechSynthesisRef.current = window.speechSynthesis;
-      }
-      if (currentUtteranceRef.current) {
-        speechSynthesisRef.current?.cancel();
-      }
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = lang;
-      utterance.voice = voice;
-      utterance.pitch = 1;
-      utterance.rate = 1;
-      utterance.volume = 1;
-
-      utterance.onstart = () => {
+      try {
         setTtsState({ isPlaying: true, currentText: text });
-      };
 
-      utterance.onend = () => {
+        const response = await fetch('/api/tts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text,
+            language: lang,
+            voiceConfig: {
+              gender,
+            },
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('TTS API request failed');
+        }
+
+        const audioData = await response.arrayBuffer();
+
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const audioBuffer = await audioContext.decodeAudioData(audioData);
+
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(audioContext.destination);
+        source.start(0);
+
+        source.onended = () => {
+          setTtsState({ isPlaying: false });
+          audioContext.close();
+        };
+      } catch (err) {
+        console.error('Error in speakText:', err);
+        setError('音声の再生に失敗しました。');
         setTtsState({ isPlaying: false });
-        currentUtteranceRef.current = null;
-      };
-
-      utterance.onerror = (event: any) => {
-        console.error('TTS error:', event);
-        setTtsState({ isPlaying: false });
-        currentUtteranceRef.current = null;
-      };
-
-      utterance.onpause = () => {
-        setTtsState(prev => ({ ...prev, isPlaying: false }));
-      };
-
-      utterance.onresume = () => {
-        setTtsState(prev => ({ ...prev, isPlaying: true }));
-      };
-
-      currentUtteranceRef.current = utterance;
-
-      speechSynthesisRef.current?.speak(utterance);
+      }
     },
-    [ttsConfig.enabled, getTtsVoice]
+    [ttsConfig.enabled]
   );
 
   const addMessage = useCallback((newMessage: Message) => {
@@ -222,7 +189,7 @@ export function useAudioProcessing(
             addMessage(translationMessage);
 
             if (ttsConfig.enabled) {
-              speakText(data.translation, targetLanguage, ttsConfig.voiceConfig.gender);
+              await speakText(data.translation, targetLanguage, ttsConfig.voiceConfig.gender);
             }
 
             lastTranslatedTextRef.current = text;
@@ -370,10 +337,6 @@ export function useAudioProcessing(
       analyserRef.current = null;
       dataArrayRef.current = null;
     }
-    if (speechSynthesisRef.current) {
-      speechSynthesisRef.current?.cancel();
-      speechSynthesisRef.current = null;
-    }
 
     lastTranslatedTextRef.current = '';
   }, []);
@@ -382,10 +345,6 @@ export function useAudioProcessing(
     return () => {
       debouncedTranslate.cancel();
       stopListening();
-      if (speechSynthesisRef.current) {
-        speechSynthesisRef.current.cancel();
-        speechSynthesisRef.current = null;
-      }
     };
   }, [debouncedTranslate, stopListening]);
 
