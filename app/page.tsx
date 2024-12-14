@@ -2,20 +2,19 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react'
 import Image from 'next/image'
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Slider } from "@/components/ui/slider"
-import { Settings2, LayoutListIcon as LayoutSideBySide, LayoutGridIcon as LayoutVertical, RotateCcw, Maximize2 } from 'lucide-react'
+import Link from 'next/link'
+import { Button } from '../components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
+import { Switch } from '../components/ui/switch'
+import { Slider } from '../components/ui/slider'
+import { Settings2, LayoutListIcon as LayoutSideBySide, LayoutGridIcon as LayoutVertical, RotateCcw, Maximize2, Volume2, VolumeX } from 'lucide-react'
 import { useAudioProcessing } from './hooks/useAudioProcessing'
 import { VolumeGauge } from './components/VolumeGauge'
-import Link from 'next/link'
-
 
 type LayoutMode = 'side-by-side' | 'vertical' | 'inverse' | 'translation-only';
 
 export default function SimultaneousInterpretationSystem() {
-  const [inputLanguage, setInputLanguage] = useState('ja-JP')  // 追加
+  const [inputLanguage, setInputLanguage] = useState('ja-JP')
   const [targetLanguage, setTargetLanguage] = useState('en')
   const [useLocalProcessing, setUseLocalProcessing] = useState(true)
   const [updateInterval, setUpdateInterval] = useState(100)
@@ -24,6 +23,14 @@ export default function SimultaneousInterpretationSystem() {
   const [layoutMode, setLayoutMode] = useState<LayoutMode>('side-by-side')
   const japaneseMessagesEndRef = useRef<HTMLDivElement>(null)
   const translatedMessagesEndRef = useRef<HTMLDivElement>(null)
+  const [ttsEnabled, setTtsEnabled] = useState(true)
+  const [voiceGender, setVoiceGender] = useState<'MALE' | 'FEMALE'>('FEMALE')
+  const [isMobileDevice, setIsMobileDevice] = useState(false)
+
+  useEffect(() => {
+    const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    setIsMobileDevice(isMobile)
+  }, [])
 
   const {
     isListening,
@@ -33,8 +40,21 @@ export default function SimultaneousInterpretationSystem() {
     clearConversation,
     currentVolume,
     error,
-    performanceMetrics
-  } = useAudioProcessing(inputLanguage, targetLanguage, useLocalProcessing, updateInterval, voiceThreshold)  // inputLanguageを追加
+    performanceMetrics,
+    ttsState
+  } = useAudioProcessing(
+    inputLanguage,
+    targetLanguage,
+    useLocalProcessing,
+    updateInterval,
+    voiceThreshold,
+    {
+      enabled: ttsEnabled,
+      voiceConfig: {
+        gender: voiceGender
+      }
+    }
+  )
 
   const toggleListening = () => {
     if (isListening) {
@@ -51,12 +71,12 @@ export default function SimultaneousInterpretationSystem() {
 
   useEffect(() => {
     return () => {
-      stopListening();
-    };
-  }, [stopListening]);
+      stopListening()
+    }
+  }, [stopListening])
 
-  const transcriptMessages = useMemo(() => messages.filter(m => m.type === 'transcript' && m.isFinal), [messages]);
-  const translationMessages = useMemo(() => messages.filter(m => m.type === 'translation'), [messages]);
+  const transcriptMessages = useMemo(() => messages.filter(m => m.type === 'transcript' && m.isFinal), [messages])
+  const translationMessages = useMemo(() => messages.filter(m => m.type === 'translation'), [messages])
 
   const renderLayoutButtons = () => (
     <div className="flex gap-2">
@@ -93,37 +113,31 @@ export default function SimultaneousInterpretationSystem() {
         <Maximize2 className="h-4 w-4" />
       </Button>
     </div>
-  );
+  )
 
   const getLanguageDisplay = (langCode: string): string => {
     switch (langCode) {
       // 東アジア
-      case 'ja': return '日本語';
-      case 'ja-JP': return '日本語';
-      case 'en': return '英語';
-      case 'en-US': return '英語';
-      case 'zh': return '中国語（簡体字）';
-      case 'zh-CN': return '中国語';  // 追加
+      case 'ja': case 'ja-JP': return '日本語';
+      case 'en': case 'en-US': return '英語';
+      case 'zh': case 'zh-CN': return '中国語（簡体字）';
       case 'zh-HK': return '広東語（繁体字）';
-      case 'yue-HK': return '広東語';  // 追加
+      case 'yue-HK': return '広東語';
       case 'zh-TW': return '台湾中国語（繁体字）';
-      case 'ko': return '韓国語';
-      case 'ko-KR': return '韓国語';
+      case 'ko': case 'ko-KR': return '韓国語';
       case 'mo': return 'モンゴル語';
- 
+
       // 東南アジア
       case 'vi': return 'ベトナム語';
-      case 'th': return 'タイ語';
-      case 'th-TH': return 'タイ語';
+      case 'th': case 'th-TH': return 'タイ語';
       case 'ms': return 'マレー語';
-      case 'id': return 'インドネシア語';
-      case 'id-ID': return 'インドネシア語';
+      case 'id': case 'id-ID': return 'インドネシア語';
       case 'fil': return 'フィリピン語';
       case 'my': return 'ミャンマー語';
       case 'km': return 'クメール語';
       case 'lo': return 'ラオ語';
       case 'tl': return 'タガログ語';
- 
+
       // 南アジア
       case 'hi': return 'ヒンディー語';
       case 'bn': return 'ベンガル語';
@@ -137,7 +151,7 @@ export default function SimultaneousInterpretationSystem() {
       case 'pa': return 'パンジャーブ語';
       case 'or': return 'オリヤー語';
       case 'si': return 'シンハラ語';
- 
+
       // 西欧
       case 'fr': return 'フランス語';
       case 'de': return 'ドイツ語';
@@ -145,14 +159,14 @@ export default function SimultaneousInterpretationSystem() {
       case 'it': return 'イタリア語';
       case 'pt': return 'ポルトガル語';
       case 'nl': return 'オランダ語';
- 
+
       // 北欧
       case 'sv': return 'スウェーデン語';
       case 'da': return 'デンマーク語';
       case 'no': return 'ノルウェー語';
       case 'fi': return 'フィンランド語';
       case 'is': return 'アイスランド語';
- 
+
       // 東欧
       case 'ru': return 'ロシア語';
       case 'pl': return 'ポーランド語';
@@ -168,12 +182,12 @@ export default function SimultaneousInterpretationSystem() {
       case 'lt': return 'リトアニア語';
       case 'lv': return 'ラトビア語';
       case 'et': return 'エストニア語';
- 
+
       // その他ヨーロッパ
       case 'el': return 'ギリシャ語';
       case 'tr': return 'トルコ語';
       case 'ka': return 'グルジア語';
- 
+
       // 中東
       case 'ar': return 'アラビア語';
       case 'he': return 'ヘブライ語';
@@ -181,7 +195,7 @@ export default function SimultaneousInterpretationSystem() {
       case 'ku': return 'クルド語';
       case 'am': return 'アムハラ語';
       case 'yi': return 'イディッシュ語';
- 
+
       // アフリカ
       case 'sw': return 'スワヒリ語';
       case 'zu': return 'ズールー語';
@@ -190,146 +204,149 @@ export default function SimultaneousInterpretationSystem() {
       case 'ha': return 'ハウサ語';
       case 'ig': return 'イボ語';
       case 'yo': return 'ヨルバ語';
- 
+
       // 国際補助言語
       case 'eo': return 'エスペラント語';
- 
+
       default: return 'その他';
     }
- };
- 
- return (
-  <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-    <div className="max-w-6xl mx-auto">
-      <div className="flex mb-8">
-        <Link href="https://lshk-ai-service.studio.site/">
-          <Image
-            src="/assets/logo/lifesupport-icon-512x512.png"
-            alt="Life Support Icon"
-            width={64}
-            height={64}
-            priority
-            className="h-24 w-auto hover:opacity-80 transition-opacity"
-          />
-        </Link>
+  };
 
-        <div className="flex-1 text-center">
-          <h1 className="text-3xl font-bold mb-2">
-            EarthSync
-            <div className="h-1 w-24 bg-blue-500 mx-auto mt-2"></div>
-          </h1>
-          <p className="text-center text-gray-600">
-            ７１の言語と７６億の話者を紡ぐ。<br />
-            貴方の言葉が地球上の人とシンクする。
-          </p>
-        </div>
-      </div>
+  return (
+    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex mb-8">
+          <Link href="https://lshk-ai-service.studio.site/">
+            <Image
+              src="/assets/logo/lifesupport-icon-512x512.png"
+              alt="Life Support Icon"
+              width={64}
+              height={64}
+              priority
+              className="h-24 w-auto hover:opacity-80 transition-opacity"
+            />
+          </Link>
 
-      <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-        <div className="flex flex-col gap-4">
-          {/* 1行目：入力言語切替ボタンと国旗ボタン */}
-          <div className="flex items-center gap-4">
-            <Button variant="secondary" className="pointer-events-none">
-              入力言語切替
-            </Button>
-
-            <div className="flex gap-2">
-              <button
-                onClick={() => setInputLanguage('ja-JP')}
-                className={`
-                  w-8 h-8 
-                  flex items-center justify-center 
-                  rounded-md 
-                  transition-colors
-                  ${inputLanguage === 'ja-JP' ? 'bg-accent' : 'hover:bg-accent/50'}
-                  text-lg
-                `}
-              >
-                🇯🇵
-              </button>
-              <button
-                onClick={() => setInputLanguage('en-US')}
-                className={`
-                  w-8 h-8 
-                  flex items-center justify-center 
-                  rounded-md 
-                  transition-colors
-                  ${inputLanguage === 'en-US' ? 'bg-accent' : 'hover:bg-accent/50'}
-                  text-lg
-                `}
-              >
-                🇺🇸
-              </button>
-              <button
-                onClick={() => setInputLanguage('yue-HK')}
-                className={`
-                  w-8 h-8 
-                  flex items-center justify-center 
-                  rounded-md 
-                  transition-colors
-                  ${inputLanguage === 'yue-HK' ? 'bg-accent' : 'hover:bg-accent/50'}
-                  text-lg
-                  relative group
-                `}
-                title={/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ? "モバイルでは中国語（繁体字）として認識されます" : "広東語"}
-              >
-                🇭🇰
-              </button>
-              <button
-                onClick={() => setInputLanguage('zh-CN')}
-                className={`
-                  w-8 h-8 
-                  flex items-center justify-center 
-                  rounded-md 
-                  transition-colors
-                  ${inputLanguage === 'zh-CN' ? 'bg-accent' : 'hover:bg-accent/50'}
-                  text-lg
-                `}
-              >
-                🇨🇳
-              </button>
-              <button
-                onClick={() => setInputLanguage('ko-KR')}
-                className={`
-                  w-8 h-8 
-                  flex items-center justify-center 
-                  rounded-md 
-                  transition-colors
-                  ${inputLanguage === 'ko-KR' ? 'bg-accent' : 'hover:bg-accent/50'}
-                  text-lg
-                `}
-              >
-                🇰🇷
-              </button>
-              <button
-                onClick={() => setInputLanguage('id-ID')}
-                className={`
-                  w-8 h-8 
-                  flex items-center justify-center 
-                  rounded-md 
-                  transition-colors
-                  ${inputLanguage === 'id-ID' ? 'bg-accent' : 'hover:bg-accent/50'}
-                  text-lg
-                `}
-              >
-                🇮🇩
-              </button>
-            </div>
+          <div className="flex-1 text-center">
+            <h1 className="text-3xl font-bold mb-2">
+              EarthSync
+              <div className="h-1 w-24 bg-blue-500 mx-auto mt-2"></div>
+            </h1>
+            <p className="text-center text-gray-600">
+              ７１の言語と７６億の話者を紡ぐ。<br />
+              貴方の言葉が地球上の人とシンクする。
+            </p>
           </div>
+        </div>
 
-          {/* 2行目：出力翻訳言語選択と同時通訳開始ボタン */}
-          <div className="flex items-center justify-between">
-            <Button
-              onClick={toggleListening}
-              variant={isListening ? "destructive" : "default"}
-            >
-              {isListening ? "停止" : "出力翻訳言語"}
-            </Button>
-            <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-              <SelectTrigger>
+        <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+          <div className="flex flex-col gap-4">
+            {/* 1行目：入力言語切替ボタンと国旗ボタン */}
+            <div className="flex items-center gap-4">
+              <Button variant="secondary" className="pointer-events-none">
+                入力言語切替
+              </Button>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setInputLanguage('ja-JP')}
+                  className={`
+                    w-8 h-8 
+                    flex items-center justify-center 
+                    rounded-md 
+                    transition-colors
+                    ${inputLanguage === 'ja-JP' ? 'bg-accent' : 'hover:bg-accent/50'}
+                    text-lg
+                  `}
+                >
+                  🇯🇵
+                </button>
+                <button
+                  onClick={() => setInputLanguage('en-US')}
+                  className={`
+                    w-8 h-8 
+                    flex items-center justify-center 
+                    rounded-md 
+                    transition-colors
+                    ${inputLanguage === 'en-US' ? 'bg-accent' : 'hover:bg-accent/50'}
+                    text-lg
+                  `}
+                >
+                  🇺🇸
+                </button>
+                <button
+                  onClick={() => setInputLanguage('yue-HK')}
+                  className={`
+                    w-8 h-8 
+                    flex items-center justify-center 
+                    rounded-md 
+                    transition-colors
+                    ${inputLanguage === 'yue-HK' ? 'bg-accent' : 'hover:bg-accent/50'}
+                    text-lg
+                    relative group
+                  `}
+                  title={isMobileDevice ? "モバイルでは中国語（繁体字）として認識されます" : "広東語"}
+                >
+                  🇭🇰
+                </button>
+                <button
+                  onClick={() => setInputLanguage('zh-CN')}
+                  className={`
+                    w-8 h-8 
+                    flex items-center justify-center 
+                    rounded-md 
+                    transition-colors
+                    ${inputLanguage === 'zh-CN' ? 'bg-accent' : 'hover:bg-accent/50'}
+                    text-lg
+                  `}
+                >
+                  🇨🇳
+                </button>
+                <button
+                  onClick={() => setInputLanguage('ko-KR')}
+                  className={`
+                    w-8 h-8 
+                    flex items-center justify-center 
+                    rounded-md 
+                    transition-colors
+                    ${inputLanguage === 'ko-KR' ? 'bg-accent' : 'hover:bg-accent/50'}
+                    text-lg
+                  `}
+                >
+                  🇰🇷
+                </button>
+                <button
+                  onClick={() => setInputLanguage('id-ID')}
+                  className={`
+                    w-8 h-8 
+                    flex items-center justify-center 
+                    rounded-md 
+                    transition-colors
+                    ${inputLanguage === 'id-ID' ? 'bg-accent' : 'hover:bg-accent/50'}
+                    text-lg
+                  `}
+                >
+                  🇮🇩
+                </button>
+              </div>
+            </div>
+
+            {/* 2行目：出力翻訳言語選択と同時通訳開始ボタン */}
+<div className="flex items-center justify-between gap-2">
+    <Button
+        onClick={toggleListening}
+        variant={isListening ? "destructive" : "default"}
+    >
+        {isListening ? "停止" : "出力翻訳言語"}
+    </Button>
+
+    <div className="flex items-center gap-2">
+        {/* 言語選択 */}
+        <Select value={targetLanguage} onValueChange={setTargetLanguage}>
+            <SelectTrigger>
                 <SelectValue placeholder="言語を選択" />
-              </SelectTrigger>
-              <SelectContent>
+            </SelectTrigger>
+            <SelectContent>
                 <SelectItem value="ja">日本語</SelectItem>
                 <SelectItem value="en">英語</SelectItem>
                 <SelectItem value="zh">中国語（簡体字）</SelectItem>
@@ -400,167 +417,202 @@ export default function SimultaneousInterpretationSystem() {
                 <SelectItem value="ig">イボ語</SelectItem>
                 <SelectItem value="yo">ヨルバ語</SelectItem>
                 <SelectItem value="eo">エスペラント語</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+            </SelectContent>
+        </Select>
 
-          {/* 3行目：表示切り替えボタン類 */}
-          <div className="flex justify-center gap-4 items-center">
-            {renderLayoutButtons()}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setShowOptions(!showOptions)}
-              className={showOptions ? 'bg-accent' : ''}
-            >
-              <Settings2 className="h-4 w-4" />
-            </Button>
-            <Button onClick={clearConversation} variant="outline">
-              会話をクリア
-            </Button>
-          </div>
-        </div>
+        {/* 性別選択 */}
+        <Select
+            value={voiceGender}
+            onValueChange={(value: 'MALE' | 'FEMALE') => setVoiceGender(value)}
+        >
+            <SelectTrigger className="w-[100px]">
+                <SelectValue placeholder="音声" />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="FEMALE">👩 女性</SelectItem>
+                <SelectItem value="MALE">👨 男性</SelectItem>
+            </SelectContent>
+        </Select>
 
-{showOptions && (
-<div className="space-y-4 mt-4 pt-4 border-t">
-  <div className="flex items-center justify-between">
-    <span>ローカル処理を使用</span>
-    <Switch
-      checked={useLocalProcessing}
-      onCheckedChange={setUseLocalProcessing}
-    />
-  </div>
-  <div>
-    <label htmlFor="update-interval" className="block text-sm font-medium text-gray-700 mb-2">
-      音声認識の更新間隔: {updateInterval}ミリ秒
-    </label>
-    <Slider
-      id="update-interval"
-      min={50}
-      max={500}
-      step={50}
-      value={[updateInterval]}
-      onValueChange={(value) => setUpdateInterval(value[0])}
-      className="w-full"
-    />
-  </div>
-  <div>
-    <label htmlFor="voice-threshold" className="block text-sm font-medium text-gray-700 mb-2">
-      音声検出閾値: {voiceThreshold.toFixed(3)}
-    </label>
-    <Slider
-      id="voice-threshold"
-      min={0.01}
-      max={0.5}
-      step={0.01}
-      value={[voiceThreshold]}
-      onValueChange={(value) => setVoiceThreshold(value[0])}
-      className="w-full"
-    />
-  </div>
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-2">
-      マイク音量
-    </label>
-    <VolumeGauge volume={currentVolume} />
-  </div>
-  <div>
-    <h3 className="text-sm font-medium text-gray-700 mb-2">パフォーマンスメトリクス</h3>
-    <p>メモリ使用量: {performanceMetrics.memoryUsage.toFixed(2)} MB</p>
-    <p>CPU使用率: {performanceMetrics.cpuUsage.toFixed(2)}%</p>
-  </div>
-</div>
-)}
-
-{error && (
-<div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">
-  <p>エラーが発生しました: {error}</p>
-  <p>システムを再起動してください。問題が解決しない場合は、管理者にお問い合わせください。</p>
-</div>
-)}
+        {/* 音声オン/オフボタン */}
+        <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTtsEnabled(!ttsEnabled)}
+            className={`${ttsEnabled ? 'text-blue-500' : 'text-gray-400'}`}
+            title={ttsEnabled ? '音声出力ON' : '音声出力OFF'}
+        >
+            {ttsEnabled ? (
+                <Volume2 className="h-4 w-4" />
+            ) : (
+                <VolumeX className="h-4 w-4" />
+            )}
+        </Button>
+    </div>
 </div>
 
-{layoutMode === 'vertical' ? (
-  <div className="bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
-    <h2 className="text-xl font-semibold mb-4">メッセージ</h2>
-    <div className="space-y-4">
-      {transcriptMessages.map((message, index) => (
-        <div key={`message-${message.timestamp}`} className="space-y-2">
-          <div className="p-3 rounded-lg bg-green-100">
-            <p>{message.content}</p>  {/* 「日本語：」を削除 */}
+            {/* 3行目：表示切り替えボタン類 */}
+            <div className="flex justify-center gap-4 items-center">
+              {renderLayoutButtons()}
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowOptions(!showOptions)}
+                className={showOptions ? 'bg-accent' : ''}
+              >
+                <Settings2 className="h-4 w-4" />
+              </Button>
+              <Button onClick={clearConversation} variant="outline">
+                会話をクリア
+              </Button>
+            </div>
           </div>
-          {translationMessages[index] && (
-            <div className={`p-3 rounded-lg ${translationMessages[index].status === 'api' ? 'bg-blue-100' : 'bg-yellow-100'}`}>
-              <p>{translationMessages[index].content}</p>  {/* 「翻訳（言語名）：」を削除 */}
-              <p className="text-xs text-gray-500 mt-1">
-                {translationMessages[index].status === 'api' ? '翻訳' : 'フォールバック翻訳'}
-              </p>
+
+          {showOptions && (
+            <div className="space-y-4 mt-4 pt-4 border-t">
+              <div className="flex items-center justify-between">
+                <span>ローカル処理を使用</span>
+                <Switch
+                  checked={useLocalProcessing}
+                  onCheckedChange={setUseLocalProcessing}
+                />
+              </div>
+              <div>
+                <label htmlFor="update-interval" className="block text-sm font-medium text-gray-700 mb-2">
+                  音声認識の更新間隔: {updateInterval}ミリ秒
+                </label>
+                <Slider
+                  id="update-interval"
+                  min={50}
+                  max={500}
+                  step={50}
+                  value={[updateInterval]}
+                  onValueChange={(value) => setUpdateInterval(value[0])}
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <label htmlFor="voice-threshold" className="block text-sm font-medium text-gray-700 mb-2">
+                  音声検出閾値: {voiceThreshold.toFixed(3)}
+                </label>
+                <Slider
+                  id="voice-threshold"
+                  min={0.01}
+                  max={0.5}
+                  step={0.01}
+                  value={[voiceThreshold]}
+                  onValueChange={(value) => setVoiceThreshold(value[0])}
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  マイク音量
+                </label>
+                <VolumeGauge volume={currentVolume} />
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-2">パフォーマンスメトリクス</h3>
+                <p>メモリ使用量: {performanceMetrics.memoryUsage.toFixed(2)} MB</p>
+                <p>CPU使用率: {performanceMetrics.cpuUsage.toFixed(2)}%</p>
+              </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">
+              <p>エラーが発生しました: {error}</p>
+              <p>システムを再起動してください。問題が解決しない場合は、管理者にお問い合わせください。</p>
             </div>
           )}
         </div>
-      ))}
-    </div>
-  </div>
-) : layoutMode === 'translation-only' ? (
-<div className="bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
-<h2 className="text-xl font-semibold mb-4">翻訳 ({getLanguageDisplay(targetLanguage)})</h2>
-<div className="space-y-4">
-  {translationMessages.map((message) => (
-    <div key={message.timestamp} className={`p-3 rounded-lg ${message.status === 'api' ? 'bg-blue-100' : 'bg-yellow-100'}`}>
-      <p>{message.content}</p>
-      <p className="text-xs text-gray-500 mt-1">
-        {message.status === 'api' ? '翻訳' : 'フォールバック翻訳'}
-      </p>
-    </div>
-  ))}
-  {translationMessages.length === 0 && (
-    <p className="text-gray-600">まだ翻訳結果はありません。音声認識が開始されると翻訳結果が表示されます。</p>
-  )}
-  <div ref={translatedMessagesEndRef} />
-</div>
-</div>
-) : (
-<div className="flex space-x-4">
-<div className="w-1/2 bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
-  <h2 className="text-xl font-semibold mb-4">{getLanguageDisplay(inputLanguage)}</h2>
-  <div className="space-y-4">
-    {transcriptMessages.map((message) => (
-      <div key={message.timestamp} className="p-3 rounded-lg bg-green-100">
-        <p>{message.content}</p>
+
+        {/* メッセージ表示部分 */}
+        {layoutMode === 'vertical' ? (
+          <div className="bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
+            <h2 className="text-xl font-semibold mb-4">メッセージ</h2>
+            <div className="space-y-4">
+              {transcriptMessages.map((message, index) => (
+                <div key={`message-${message.timestamp}`} className="space-y-2">
+                  <div className="p-3 rounded-lg bg-green-100">
+                    <p>{message.content}</p>
+                  </div>
+                  {translationMessages[index] && (
+                    <div className={`p-3 rounded-lg ${translationMessages[index].status === 'api' ? 'bg-blue-100' : 'bg-yellow-100'}`}>
+                      <p>{translationMessages[index].content}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {translationMessages[index].status === 'api' ? '翻訳' : 'フォールバック翻訳'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))}
+              <div ref={japaneseMessagesEndRef} />
+            </div>
+          </div>
+        ) : layoutMode === 'translation-only' ? (
+          <div className="bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
+            <h2 className="text-xl font-semibold mb-4">翻訳 ({getLanguageDisplay(targetLanguage)})</h2>
+            <div className="space-y-4">
+              {translationMessages.map((message) => (
+                <div key={message.timestamp} className={`p-3 rounded-lg ${message.status === 'api' ? 'bg-blue-100' : 'bg-yellow-100'}`}>
+                  <p>{message.content}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {message.status === 'api' ? '翻訳' : 'フォールバック翻訳'}
+                  </p>
+                </div>
+              ))}
+              {translationMessages.length === 0 && (
+                <p className="text-gray-600">まだ翻訳結果はありません。音声認識が開始されると翻訳結果が表示されます。</p>
+              )}
+              <div ref={translatedMessagesEndRef} />
+            </div>
+          </div>
+        ) : (
+          <div className="flex space-x-4">
+            <div className="w-1/2 bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
+              <h2 className="text-xl font-semibold mb-4">{getLanguageDisplay(inputLanguage)}</h2>
+              <div className="space-y-4">
+                {transcriptMessages.map((message) => (
+                  <div key={message.timestamp} className="p-3 rounded-lg bg-green-100">
+                    <p>{message.content}</p>
+                  </div>
+                ))}
+                {transcriptMessages.length === 0 && (
+                  <p className="text-gray-600">「出力翻訳言語」ボタンを押すと音声認識結果が表示されます。まだメッセージはありません。</p>
+                )}
+                <div ref={japaneseMessagesEndRef} />
+              </div>
+            </div>
+            <div className="w-1/2 bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
+              <div className={layoutMode === 'inverse' ? 'transform rotate-180' : ''}>
+                <h2 className={`text-xl font-semibold mb-4 ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}>
+                  翻訳 ({getLanguageDisplay(targetLanguage)})
+                </h2>
+                <div className={`space-y-4 ${layoutMode === 'inverse' ? 'transform rotate-180 flex flex-col-reverse' : ''}`}>
+                  {translationMessages.map((message) => (
+                    <div
+                      key={message.timestamp}
+                      className={`p-3 rounded-lg ${message.status === 'api' ? 'bg-blue-100' : 'bg-yellow-100'} ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}
+                    >
+                      <p>{message.content}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {message.status === 'api' ? '翻訳' : 'フォールバック翻訳'}
+                      </p>
+                    </div>
+                  ))}
+                  {translationMessages.length === 0 && (
+                    <p className={`text-gray-600 ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}>
+                      「出力翻訳言語」ボタンを押すと音声認識結果が表示されます。まだ翻訳結果はありません。
+                    </p>
+                  )}
+                  <div ref={translatedMessagesEndRef} />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-    ))}
-    {transcriptMessages.length === 0 && (
-      <p className="text-gray-600">「出力翻訳言語」ボタンを押すと音声認識結果が表示されます。まだメッセージはありません。</p>
-    )}
-    <div ref={japaneseMessagesEndRef} />
-  </div>
-</div>
-<div className="w-1/2 bg-white shadow-md rounded-lg p-6 h-[calc(100vh-300px)] overflow-y-auto">
-  <div className={layoutMode === 'inverse' ? 'transform rotate-180' : ''}>
-    <h2 className={`text-xl font-semibold mb-4 ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}>
-      翻訳 ({getLanguageDisplay(targetLanguage)})
-    </h2>
-    <div className={`space-y-4 ${layoutMode === 'inverse' ? 'transform rotate-180 flex flex-col-reverse' : ''}`}>
-      {translationMessages.map((message) => (
-        <div key={message.timestamp} className={`p-3 rounded-lg ${message.status === 'api' ? 'bg-blue-100' : 'bg-yellow-100'} ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}>
-          <p>{message.content}</p>
-          <p className="text-xs text-gray-500 mt-1">
-            {message.status === 'api' ? '翻訳' : 'フォールバック翻訳'}
-          </p>
-        </div>
-      ))}
-      {translationMessages.length === 0 && (
-        <p className={`text-gray-600 ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}>
-          「出力翻訳言語」ボタンを押すと音声認識結果が表示されます。まだ翻訳結果はありません。
-        </p>
-      )}
-      <div ref={translatedMessagesEndRef} />
     </div>
-  </div>
-</div>
-</div>
-)}
-</div>
-</div>
   )
 }

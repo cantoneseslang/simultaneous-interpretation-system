@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { debounce } from 'lodash';
 
-interface Message {
+export interface Message {
   type: 'transcript' | 'translation';
   content: string;
   timestamp: number;
@@ -11,9 +11,14 @@ interface Message {
   status?: 'api' | 'fallback';
 }
 
-interface PerformanceMetrics {
+export interface PerformanceMetrics {
   memoryUsage: number;
   cpuUsage: number;
+}
+
+interface TtsState {
+  isPlaying: boolean;
+  currentText?: string;
 }
 
 declare global {
@@ -51,12 +56,20 @@ declare global {
   }
 }
 
+interface TtsConfig {
+  enabled: boolean;
+  voiceConfig: {
+    gender: 'MALE' | 'FEMALE';
+  };
+}
+
 export function useAudioProcessing(
   inputLanguage: string,
   targetLanguage: string,
   useLocalProcessing: boolean,
   updateInterval: number,
-  voiceThreshold: number
+  voiceThreshold: number,
+  ttsConfig: TtsConfig
 ) {
   const [isListening, setIsListening] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -66,12 +79,15 @@ export function useAudioProcessing(
     cpuUsage: 0,
   });
   const [currentVolume, setCurrentVolume] = useState(0);
+  const [ttsState, setTtsState] = useState<TtsState>({ isPlaying: false });
 
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
   const lastTranslatedTextRef = useRef<string>('');
+  const speechSynthesisRef = useRef<SpeechSynthesis | null>(null);
+  const currentUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   const getAdjustedLanguageCode = (code: string) => {
     if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
@@ -82,8 +98,89 @@ export function useAudioProcessing(
     return code;
   };
 
+  const getTtsVoice = useCallback((lang: string, gender: 'MALE' | 'FEMALE') => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) {
+      return null;
+    }
+    const voices = window.speechSynthesis.getVoices();
+
+    if (!voices) return null;
+
+    const filteredVoices = voices.filter(voice => {
+      const langMatch = voice.lang.startsWith(lang);
+      const genderMatch =
+        gender === 'FEMALE'
+          ? voice.name.toLowerCase().includes('female') || voice.name.toLowerCase().includes('woman')
+          : voice.name.toLowerCase().includes('male') || voice.name.toLowerCase().includes('man');
+      return langMatch && genderMatch;
+    });
+
+    if (filteredVoices.length === 0) {
+      return voices.find(voice => voice.lang.startsWith(lang)) || null;
+    }
+
+    return filteredVoices[0];
+  }, []);
+
+  const speakText = useCallback(
+    (text: string, lang: string, gender: 'MALE' | 'FEMALE') => {
+      if (!ttsConfig.enabled || !text || !lang) {
+        return;
+      }
+
+      const voice = getTtsVoice(lang, gender);
+
+      if (!voice && lang === 'ja') {
+        return;
+      }
+      if (speechSynthesisRef.current === null) {
+        if (typeof window === 'undefined' || !window.speechSynthesis) return;
+
+        speechSynthesisRef.current = window.speechSynthesis;
+      }
+      if (currentUtteranceRef.current) {
+        speechSynthesisRef.current?.cancel();
+      }
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang;
+      utterance.voice = voice;
+      utterance.pitch = 1;
+      utterance.rate = 1;
+      utterance.volume = 1;
+
+      utterance.onstart = () => {
+        setTtsState({ isPlaying: true, currentText: text });
+      };
+
+      utterance.onend = () => {
+        setTtsState({ isPlaying: false });
+        currentUtteranceRef.current = null;
+      };
+
+      utterance.onerror = (event: any) => {
+        console.error('TTS error:', event);
+        setTtsState({ isPlaying: false });
+        currentUtteranceRef.current = null;
+      };
+
+      utterance.onpause = () => {
+        setTtsState(prev => ({ ...prev, isPlaying: false }));
+      };
+
+      utterance.onresume = () => {
+        setTtsState(prev => ({ ...prev, isPlaying: true }));
+      };
+
+      currentUtteranceRef.current = utterance;
+
+      speechSynthesisRef.current?.speak(utterance);
+    },
+    [ttsConfig.enabled, getTtsVoice]
+  );
+
   const addMessage = useCallback((newMessage: Message) => {
-    setMessages((prev) => [...prev, newMessage].slice(-100));
+    setMessages(prev => [...prev, newMessage].slice(-100));
   }, []);
 
   const clearConversation = useCallback(() => {
@@ -94,7 +191,7 @@ export function useAudioProcessing(
   const debouncedTranslate = useMemo(
     () =>
       debounce(async (text: string, isFinal: boolean) => {
-        // 最後の翻訳と同じ内容なら処理しない
+        // Skip if the text is the same as the last translated text
         if (text.trim() === lastTranslatedTextRef.current.trim()) {
           return;
         }
@@ -113,8 +210,7 @@ export function useAudioProcessing(
           }
 
           const data = await response.json();
-          
-          // isFinalがtrueの場合のみメッセージを追加
+
           if (isFinal) {
             const translationMessage: Message = {
               type: 'translation',
@@ -124,6 +220,11 @@ export function useAudioProcessing(
               status: 'api',
             };
             addMessage(translationMessage);
+
+            if (ttsConfig.enabled) {
+              speakText(data.translation, targetLanguage, ttsConfig.voiceConfig.gender);
+            }
+
             lastTranslatedTextRef.current = text;
           }
         } catch (error) {
@@ -131,13 +232,12 @@ export function useAudioProcessing(
           setError('翻訳エラーが発生しました。');
         }
       }, updateInterval),
-    [targetLanguage, addMessage, updateInterval]
+    [targetLanguage, addMessage, updateInterval, ttsConfig.enabled, speakText, ttsConfig.voiceConfig.gender]
   );
 
   const processTranscript = useCallback(
     async (transcript: string, isFinal: boolean) => {
       if (transcript.trim()) {
-        // 音声入力メッセージは常に表示（interim/final両方）
         const newMessage: Message = {
           type: 'transcript',
           content: transcript,
@@ -146,7 +246,6 @@ export function useAudioProcessing(
         };
         addMessage(newMessage);
 
-        // 翻訳は完全に音声入力が終わった時のみ実行
         if (isFinal && transcript.length > 0) {
           debouncedTranslate(transcript, true);
         }
@@ -176,7 +275,7 @@ export function useAudioProcessing(
     recognition.onstart = () => {
       setIsListening(true);
       setError(null);
-      
+
       if (!audioContextRef.current) {
         const audioContext = new AudioContext();
         const analyser = audioContext.createAnalyser();
@@ -184,44 +283,47 @@ export function useAudioProcessing(
         analyser.minDecibels = -90;
         analyser.maxDecibels = -10;
         analyser.smoothingTimeConstant = 0.85;
-        
+
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
         dataArrayRef.current = dataArray;
         analyserRef.current = analyser;
         audioContextRef.current = audioContext;
-    
-        navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-          if (audioContextRef.current) {
-            const source = audioContextRef.current.createMediaStreamSource(stream);
-            if (analyserRef.current) {
-              source.connect(analyserRef.current);
-              
-              const updateVolume = () => {
-                if (analyserRef.current && dataArrayRef.current) {
-                  analyserRef.current.getByteFrequencyData(dataArrayRef.current);
-                  
-                  let sum = 0;
-                  const data = dataArrayRef.current;
-                  for (let i = 0; i < bufferLength; i++) {
-                    sum += data[i] * data[i];
+
+        navigator.mediaDevices
+          .getUserMedia({ audio: true })
+          .then(stream => {
+            if (audioContextRef.current) {
+              const source = audioContextRef.current.createMediaStreamSource(stream);
+              if (analyserRef.current) {
+                source.connect(analyserRef.current);
+
+                const updateVolume = () => {
+                  if (analyserRef.current && dataArrayRef.current) {
+                    analyserRef.current.getByteFrequencyData(dataArrayRef.current);
+
+                    let sum = 0;
+                    const data = dataArrayRef.current;
+                    for (let i = 0; i < bufferLength; i++) {
+                      sum += data[i] * data[i];
+                    }
+                    const rms = Math.sqrt(sum / bufferLength);
+                    const normalizedVolume = Math.min(rms / 256, 1);
+
+                    setCurrentVolume(normalizedVolume);
                   }
-                  const rms = Math.sqrt(sum / bufferLength);
-                  const normalizedVolume = Math.min(rms / 256, 1);
-                  
-                  setCurrentVolume(normalizedVolume);
-                }
-                if (isListening) {
-                  requestAnimationFrame(updateVolume);
-                }
-              };
-              updateVolume();
+                  if (isListening) {
+                    requestAnimationFrame(updateVolume);
+                  }
+                };
+                updateVolume();
+              }
             }
-          }
-        }).catch(error => {
-          console.error('Error getting audio stream:', error);
-          setError('マイクの接続に失敗しました。');
-        });
+          })
+          .catch(error => {
+            console.error('Error getting audio stream:', error);
+            setError('マイクの接続に失敗しました。');
+          });
       }
     };
 
@@ -268,6 +370,11 @@ export function useAudioProcessing(
       analyserRef.current = null;
       dataArrayRef.current = null;
     }
+    if (speechSynthesisRef.current) {
+      speechSynthesisRef.current?.cancel();
+      speechSynthesisRef.current = null;
+    }
+
     lastTranslatedTextRef.current = '';
   }, []);
 
@@ -275,6 +382,10 @@ export function useAudioProcessing(
     return () => {
       debouncedTranslate.cancel();
       stopListening();
+      if (speechSynthesisRef.current) {
+        speechSynthesisRef.current.cancel();
+        speechSynthesisRef.current = null;
+      }
     };
   }, [debouncedTranslate, stopListening]);
 
@@ -287,5 +398,6 @@ export function useAudioProcessing(
     error,
     performanceMetrics,
     currentVolume,
+    ttsState,
   };
 }
