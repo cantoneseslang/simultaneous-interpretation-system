@@ -21,41 +21,6 @@ interface TtsState {
   currentText?: string;
 }
 
-declare global {
-  interface Window {
-    SpeechRecognition?: typeof SpeechRecognition;
-    webkitSpeechRecognition?: typeof SpeechRecognition;
-  }
-
-  var SpeechRecognition: {
-    prototype: SpeechRecognitionInstance;
-    new (): SpeechRecognitionInstance;
-  };
-
-  interface SpeechRecognitionInstance {
-    lang: string;
-    continuous: boolean;
-    interimResults: boolean;
-    start: () => void;
-    stop: () => void;
-    abort?: () => void;
-    onstart: (() => void) | null;
-    onresult: ((event: SpeechRecognitionEvent) => void) | null;
-    onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
-    onend: (() => void) | null;
-  }
-
-  interface SpeechRecognitionEvent {
-    results: SpeechRecognitionResultList;
-    resultIndex: number;
-  }
-
-  interface SpeechRecognitionErrorEvent {
-    error: string;
-    message?: string;
-  }
-}
-
 interface TtsConfig {
   enabled: boolean;
   voiceConfig: {
@@ -81,7 +46,7 @@ export function useAudioProcessing(
   const [currentVolume, setCurrentVolume] = useState(0);
   const [ttsState, setTtsState] = useState<TtsState>({ isPlaying: false });
 
-  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
@@ -227,7 +192,7 @@ export function useAudioProcessing(
       recognitionRef.current = null;
     }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
       setError('このブラウザは音声認識をサポートしていません。');
