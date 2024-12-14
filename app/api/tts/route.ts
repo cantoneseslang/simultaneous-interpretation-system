@@ -6,27 +6,9 @@ export async function POST(req: Request) {
   const { text, language, voiceConfig } = await req.json();
 
   try {
-    // Load credentials from environment variable
-    const credentialsJson = process.env.GOOGLE_CREDENTIALS;
-    if (!credentialsJson) {
-      console.error('Missing GOOGLE_CREDENTIALS environment variable.');
-      return NextResponse.json({ error: 'Server configuration error: Missing credentials' }, { status: 500 });
-    }
-
-    // Parse credentials and fix escaped newlines in private key
-    const credentials = JSON.parse(credentialsJson);
-    if (credentials.private_key) {
-      credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
-    } else {
-      console.error('Invalid credentials: Missing private_key.');
-      return NextResponse.json({ error: 'Server configuration error: Invalid credentials' }, { status: 500 });
-    }
-
-    // Initialize the TextToSpeech client
-    const client = new TextToSpeechClient({
-      credentials,
-      projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
-    });
+    // Initialize the TextToSpeech client without manual credentials
+    const client = new TextToSpeechClient();
+    // The client will use credentials from the GOOGLE_APPLICATION_CREDENTIALS environment variable
 
     const [response] = await client.synthesizeSpeech({
       input: { text },
