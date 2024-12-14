@@ -1,5 +1,6 @@
 // app/api/tts/route.ts
 import { TextToSpeechClient } from '@google-cloud/text-to-speech';
+import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   const { text, language, voiceConfig } = await req.json();
@@ -25,6 +26,6 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error('TTS Error:', error);
-    return Response.json({ error: 'TTS処理に失敗しました' }, { status: 500 });
+    return NextResponse.json({ error: 'TTS処理に失敗しました' }, { status: 500 });
   }
 }
