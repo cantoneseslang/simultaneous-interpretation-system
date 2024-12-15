@@ -53,19 +53,15 @@ export default function SimultaneousInterpretationSystem() {
     currentVolume,
     error,
     performanceMetrics,
-    ttsState // ★ TTSの状態をここから受け取る
+    ttsState
   } = useAudioProcessing(
     inputLanguage,
     targetLanguage,
-    useLocalProcessing,
-    voiceThreshold,
     {
       enabled: ttsEnabled,
-      voiceConfig: {
-        gender: voiceGender
-      }
+      voiceConfig: { gender: voiceGender }
     }
-  )
+  );
 
   const toggleListening = () => {
     if (isListening) {
@@ -633,8 +629,7 @@ export default function SimultaneousInterpretationSystem() {
         )}
       </div>
 
-      {/* === 追加: 実際にTTS音声を出力するaudio要素 === */}
-      <audio ref={audioRef} hidden />
+      ...
     </div>
   )
 }

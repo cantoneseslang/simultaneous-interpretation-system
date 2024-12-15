@@ -29,7 +29,6 @@ interface TtsConfig {
   };
 }
 
-// 戻り値の型を定義する（慣習的にUseAudioProcessingReturnとか名前をつけても良い）
 interface UseAudioProcessingReturn {
   isListening: boolean;
   messages: Message[];
@@ -44,18 +43,14 @@ interface UseAudioProcessingReturn {
 
 /**
  * STT（音声入力）→ 翻訳 → TTS 再生を担うフック
- * 
+ *
  * @param inputLanguage 入力言語コード（例: 'ja-JP'）
  * @param targetLanguage 翻訳後の言語コード（例: 'en'）
- * @param useLocalProcessing ローカル処理を使うかどうか（未使用なら削除可）
- * @param voiceThreshold 音声検出閾値（未使用なら削除可）
  * @param ttsConfig TTS有効/無効やボイス設定
  */
 export function useAudioProcessing(
   inputLanguage: string,
   targetLanguage: string,
-  useLocalProcessing: boolean,
-  voiceThreshold: number,
   ttsConfig: TtsConfig
 ): UseAudioProcessingReturn {
   const [isListening, setIsListening] = useState(false);
@@ -73,7 +68,6 @@ export function useAudioProcessing(
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
 
-  // 音声認識で yue-HK がモバイルで zh-HK に変わる対応
   const getAdjustedLanguageCode = useCallback((code: string) => {
     if (typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
       if (code === 'yue-HK') {
@@ -84,7 +78,7 @@ export function useAudioProcessing(
   }, []);
 
   /**
-   * TTSを呼んでAudioContext再生
+   * TTSを呼んでAudioContextで再生
    */
   const speakText = useCallback(
     async (text: string, lang: string, gender: TTSGender) => {
@@ -131,21 +125,21 @@ export function useAudioProcessing(
   );
 
   /**
-   * Messageを追加（最大100件まで）
+   * メッセージを追加（最大100件）
    */
   const addMessage = useCallback((newMessage: Message) => {
     setMessages(prev => [...prev, newMessage].slice(-100));
   }, []);
 
   /**
-   * 会話をクリア
+   * 会話履歴クリア
    */
   const clearConversation = useCallback(() => {
     setMessages([]);
   }, []);
 
   /**
-   * STT結果を翻訳・TTS再生
+   * 翻訳＋TTSを呼ぶ関数
    */
   const translateAndSpeak = useCallback(
     async (text: string) => {
@@ -172,7 +166,7 @@ export function useAudioProcessing(
         };
         addMessage(translationMessage);
 
-        // TTS
+        // TTS合成と再生
         if (ttsConfig.enabled) {
           await speakText(translation, targetLanguage, ttsConfig.voiceConfig.gender);
         }
@@ -181,16 +175,16 @@ export function useAudioProcessing(
         setError('翻訳または音声合成でエラーが発生しました。');
       }
     },
-    [targetLanguage, addMessage, speakText, ttsConfig.enabled, ttsConfig.voiceConfig.gender]
+    [addMessage, speakText, targetLanguage, ttsConfig.enabled, ttsConfig.voiceConfig.gender]
   );
 
   /**
-   * SpeechRecognitionで区切られた音声を受け取り → 翻訳＆再生
+   * SpeechRecognitionからの音声認識結果を処理
    */
   const processTranscript = useCallback(
     async (transcript: string, isFinal: boolean) => {
       if (transcript.trim()) {
-        // STT結果をmessagesに追加
+        // STT結果を追加
         const newMessage: Message = {
           type: 'transcript',
           content: transcript,
@@ -199,7 +193,7 @@ export function useAudioProcessing(
         };
         addMessage(newMessage);
 
-        // フレーズが確定したらすぐ翻訳+TTSへ
+        // フレーズ確定時に翻訳+TTS
         if (isFinal && transcript.length > 0) {
           await translateAndSpeak(transcript);
         }
@@ -212,7 +206,6 @@ export function useAudioProcessing(
    * 音声認識開始
    */
   const startListening = useCallback(() => {
-    // 既存の recognition を停止
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       recognitionRef.current = null;
@@ -233,7 +226,7 @@ export function useAudioProcessing(
       setIsListening(true);
       setError(null);
 
-      // マイク音量解析を初期化
+      // マイク音量解析の初期化
       if (!audioContextRef.current) {
         const audioContext = new AudioContext();
         const analyser = audioContext.createAnalyser();
@@ -268,7 +261,6 @@ export function useAudioProcessing(
                     const rms = Math.sqrt(sum / bufferLength);
                     const normalizedVolume = Math.min(rms / 256, 1);
 
-                    // ここで volumeThreshold は使っていないが、音量を setState
                     setCurrentVolume(normalizedVolume);
                   }
                   if (isListening) {
@@ -300,8 +292,8 @@ export function useAudioProcessing(
 
     recognition.onend = () => {
       setIsListening(false);
+      // 自動再開
       if (recognitionRef.current === recognition) {
-        // 自動で再開
         try {
           recognition.start();
         } catch (error) {
@@ -338,7 +330,7 @@ export function useAudioProcessing(
     }
   }, []);
 
-  // コンポーネント unmount 時に stopListening
+  // コンポーネント unmount 時
   useEffect(() => {
     return () => {
       stopListening();
