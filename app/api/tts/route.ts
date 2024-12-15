@@ -1,84 +1,27 @@
-// app/api/tts/route.ts
 import { NextResponse } from 'next/server';
 import { TranslationServiceClient } from '@google-cloud/translate';
-
-// サポートされている言語コードのマッピング
-const languageCodeMap = new Map([
-  // 東アジア
-  ['ja', 'ja-JP'],
-  ['en', 'en-US'],
-  ['zh', 'zh-CN'],
-  ['zh-HK', 'zh-HK'],
-  ['zh-TW', 'zh-TW'],
-  ['ko', 'ko-KR'],
-
-  // 東南アジア
-  ['vi', 'vi-VN'],
-  ['th', 'th-TH'],
-  ['id', 'id-ID'],
-  ['ms', 'ms-MY'],
-
-  // 南アジア
-  ['hi', 'hi-IN'],
-  ['bn', 'bn-IN'],
-  ['ta', 'ta-IN'],
-
-  // ヨーロッパ言語
-  ['fr', 'fr-FR'],
-  ['de', 'de-DE'],
-  ['es', 'es-ES'],
-  ['it', 'it-IT'],
-  ['pt', 'pt-PT'],
-  ['ru', 'ru-RU'],
-  ['pl', 'pl-PL'],
-  ['nl', 'nl-NL'],
-  ['cs', 'cs-CZ'],
-  ['el', 'el-GR'],
-  ['tr', 'tr-TR'],
-
-  // その他
-  ['ar', 'ar-XA']
-]);
+import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 
 export async function POST(req: Request) {
   try {
-    // リクエストボディの取得とバリデーション
+    // リクエストデータの取得
     const { text, targetLanguage } = await req.json();
 
-    console.log('Translation Request:', {
-      text,
-      targetLanguage
-    });
-
     if (!text || !targetLanguage) {
-      console.error('Missing parameters:', { text, targetLanguage });
       return NextResponse.json(
         { error: 'テキストまたは対象言語が指定されていません' },
         { status: 400 }
       );
     }
 
-    // 環境変数の検証
-    if (!process.env.GOOGLE_PRIVATE_KEY || !process.env.GOOGLE_CLIENT_EMAIL || !process.env.GOOGLE_PROJECT_ID) {
-      console.error('Missing environment variables:', {
-        hasPrivateKey: !!process.env.GOOGLE_PRIVATE_KEY,
-        hasClientEmail: !!process.env.GOOGLE_CLIENT_EMAIL,
-        hasProjectId: !!process.env.GOOGLE_PROJECT_ID
-      });
+    // 環境変数の確認
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+    if (!privateKey || !process.env.GOOGLE_CLIENT_EMAIL || !process.env.GOOGLE_PROJECT_ID) {
       return NextResponse.json(
         { error: '環境変数が設定されていません' },
         { status: 500 }
       );
     }
-
-    // private_keyの改行文字を処理
-    const privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
-
-    console.log('Initializing translation client...', {
-      projectId: process.env.GOOGLE_PROJECT_ID,
-      hasPrivateKey: !!privateKey,
-      hasClientEmail: !!process.env.GOOGLE_CLIENT_EMAIL
-    });
 
     // 翻訳クライアントの初期化
     const translationClient = new TranslationServiceClient({
@@ -86,85 +29,64 @@ export async function POST(req: Request) {
         client_email: process.env.GOOGLE_CLIENT_EMAIL!,
         private_key: privateKey,
       },
-      projectId: process.env.GOOGLE_PROJECT_ID,
     });
 
-    // 言語コードの変換と検証
-    const mappedLanguage = languageCodeMap.get(targetLanguage) || targetLanguage;
-
-    console.log('Preparing translation request:', {
-      sourceLang: 'auto',
-      targetLang: mappedLanguage,
-      textLength: text.length
-    });
-
-    // 翻訳リクエストの作成
-    const request = {
+    // 翻訳リクエスト
+    const [translationResponse] = await translationClient.translateText({
       parent: `projects/${process.env.GOOGLE_PROJECT_ID}/locations/global`,
       contents: [text],
       mimeType: 'text/plain',
       sourceLanguageCode: 'auto',
-      targetLanguageCode: mappedLanguage,
+      targetLanguageCode: targetLanguage,
+    });
+
+    // 翻訳結果の取得
+    const translations = translationResponse.translations || [];
+    const translatedText = translations[0]?.translatedText || '';
+
+    // Text-to-Speech クライアントの初期化
+    const ttsClient = new TextToSpeechClient({
+      credentials: {
+        client_email: process.env.GOOGLE_CLIENT_EMAIL!,
+        private_key: privateKey,
+      },
+    });
+
+    // Text-to-Speech リクエスト
+    const ttsRequest = {
+      input: { text: translatedText },
+      voice: {
+        languageCode: targetLanguage,
+        ssmlGender: 'NEUTRAL' as const,
+      },
+      audioConfig: {
+        audioEncoding: 'MP3' as const,
+      },
     };
 
-    // 翻訳の実行
-    const [response] = await translationClient.translateText(request);
+    const [ttsResponse] = await ttsClient.synthesizeSpeech(ttsRequest);
 
-    if (!response.translations || response.translations.length === 0) {
-      console.error('No translation result received');
+    // 音声データの確認
+    if (!ttsResponse.audioContent) {
       return NextResponse.json(
-        { error: '翻訳結果が取得できませんでした' },
+        { error: '音声データが生成できませんでした' },
         { status: 500 }
       );
     }
 
-    console.log('Translation successful:', {
-      sourceText: text,
-      translatedTextLength: response.translations![0].translatedText!.length
-    });
-
+    // レスポンス
     return NextResponse.json({
-      translation: response.translations![0].translatedText,
+      // Constructing the response object with the translated text and audio data
+      translation: translatedText, // The translated text from the translation service
+      audio: `data:audio/mp3;base64,${Buffer.from(ttsResponse.audioContent).toString('base64')}`, // Convert audio content to base64 string
     });
-
   } catch (error: any) {
-    console.error('Translation error:', {
-      message: error.message,
-      code: error.code,
-      details: error.details,
-      stack: error.stack,
-    });
-
-    // API制限エラーの処理
-    if (error.code === 8) {
-      return NextResponse.json(
-        {
-          error: 'API制限に達しました',
-          message: 'Resource exhausted',
-          code: error.code,
-        },
-        { status: 429 }
-      );
-    }
-
-    // 認証エラーの処理
-    if (error.code === 16) {
-      return NextResponse.json(
-        {
-          error: '認証に失敗しました',
-          message: 'Authentication failed',
-          code: error.code,
-        },
-        { status: 401 }
-      );
-    }
-
-    // 一般的なエラーの処理
+    // Log the error details to the console for debugging purposes
+    console.error('Error occurred:', error);
     return NextResponse.json(
       {
-        error: '翻訳に失敗しました',
+        error: '処理中にエラーが発生しました',
         message: error.message,
-        details: process.env.NODE_ENV === 'development' ? error.details : undefined,
         code: error.code,
       },
       { status: 500 }
