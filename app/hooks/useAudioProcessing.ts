@@ -156,7 +156,7 @@ export function useAudioProcessing(
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             text,
-            targetLanguage: translateCode,  // Cloud TTSが受理可能なコードを送信
+            targetLanguage: translateCode,  // 【修正】キー名を 'targetLanguage' に統一
             voiceConfig: { gender },
           }),
         });
