@@ -14,7 +14,7 @@ export interface Message {
   status?: 'api' | 'fallback';
 }
 
-// パフォーマンス測定用インターフェース（オプション）
+// パフォーマンス測定用（不要なら削除可）
 export interface PerformanceMetrics {
   memoryUsage: number;
   cpuUsage: number;
@@ -48,29 +48,324 @@ interface UseAudioProcessingReturn {
 }
 
 /**
- * Cloud Translate / TTS が対応可能な言語コードに変換するヘルパー関数
- * - STT 用の 'ja-JP', 'en-US', 'yue-HK' などを適宜 'ja', 'en', 'zh-HK' にマッピング
+ * Cloud Translate / TTS が認識できるISO言語コードにマッピングする関数
+ * page.tsx や STT が使用する地域コード（例: 'ja-JP', 'en-US', 'ko-KR', etc.）をまとめて対応
  */
 function mapToTranslateCode(code: string): string {
   switch (code) {
+    // === 日本語 ===
     case 'ja-JP':
+    case 'ja':
       return 'ja';
+
+    // === 英語 ===
     case 'en-US':
+    case 'en':
       return 'en';
-    case 'yue-HK':
+
+    // === 中国語（簡体字）===
+    case 'zh':
+    case 'zh-CN':
+      return 'zh'; // Cloud Translateで簡体字として扱う
+
+    // === 広東語（繁体字）===
+    case 'yue-HK':  // STT用
+    case 'zh-HK':   // UIで選択
       return 'zh-HK';
-    // 必要に応じて追加マッピング
+
+    // === 台湾中国語（繁体字）===
+    case 'zh-TW':
+      return 'zh-TW';
+
+    // === 韓国語 ===
+    case 'ko':
+    case 'ko-KR':
+      return 'ko';
+
+    // === モンゴル語 ===
+    // Cloud Translate的には 'mn' が一般的。 'mo' は非標準
+    case 'mo':
+      return 'mn';
+
+    // === ベトナム語 ===
+    case 'vi':
+    case 'vi-VN':
+      return 'vi';
+
+    // === タイ語 ===
+    case 'th':
+    case 'th-TH':
+      return 'th';
+
+    // === マレー語 ===
+    case 'ms':
+    case 'ms-MY':
+      return 'ms';
+
+    // === インドネシア語 ===
+    case 'id':
+    case 'id-ID':
+      return 'id';
+
+    // === フィリピン語（タガログ）===
+    case 'fil':
+    case 'tl':
+      return 'fil'; // Cloud Translateは 'tl' or 'fil' 両方扱えるが 'fil'推奨
+
+    // === ミャンマー語 ===
+    case 'my':  // 'my-MM' が STTで使われるかもしれない
+      return 'my';
+
+    // === クメール語（カンボジア）===
+    case 'km':
+    case 'km-KH':
+      return 'km';
+
+    // === ラオ語 ===
+    case 'lo':
+    case 'lo-LA':
+      return 'lo';
+
+    // === ヒンディー語 ===
+    case 'hi':
+    case 'hi-IN':
+      return 'hi';
+
+    // === ベンガル語 ===
+    case 'bn':
+    case 'bn-BD':
+      return 'bn';
+
+    // === ウルドゥー語 ===
+    case 'ur':
+    case 'ur-PK':
+      return 'ur';
+
+    // === タミル語 ===
+    case 'ta':
+    case 'ta-IN':
+      return 'ta';
+
+    // === テルグ語 ===
+    case 'te':
+      return 'te';
+
+    // === マラーティー語 ===
+    case 'mr':
+      return 'mr';
+
+    // === グジャラーティー語 ===
+    case 'gu':
+      return 'gu';
+
+    // === カンナダ語 ===
+    case 'kn':
+      return 'kn';
+
+    // === マラヤーラム語 ===
+    case 'ml':
+      return 'ml';
+
+    // === パンジャーブ語 ===
+    case 'pa':
+      return 'pa';
+
+    // === オリヤー語 ===
+    case 'or':
+      return 'or';
+
+    // === シンハラ語 ===
+    case 'si':
+      return 'si';
+
+    // === フランス語 ===
+    case 'fr':
+    case 'fr-FR':
+      return 'fr';
+
+    // === ドイツ語 ===
+    case 'de':
+    case 'de-DE':
+      return 'de';
+
+    // === スペイン語 ===
+    case 'es':
+    case 'es-ES':
+      return 'es';
+
+    // === イタリア語 ===
+    case 'it':
+    case 'it-IT':
+      return 'it';
+
+    // === ポルトガル語 ===
+    // 'pt-PT' や 'pt-BR' はまとめて 'pt' にする
+    case 'pt':
+    case 'pt-PT':
+    case 'pt-BR':
+      return 'pt';
+
+    // === オランダ語 ===
+    case 'nl':
+      return 'nl';
+
+    // === スウェーデン語 ===
+    case 'sv':
+      return 'sv';
+
+    // === デンマーク語 ===
+    case 'da':
+      return 'da';
+
+    // === ノルウェー語 ===
+    case 'no':
+      return 'no';
+
+    // === フィンランド語 ===
+    case 'fi':
+      return 'fi';
+
+    // === アイスランド語 ===
+    case 'is':
+      return 'is';
+
+    // === ロシア語 ===
+    case 'ru':
+      return 'ru';
+
+    // === ポーランド語 ===
+    case 'pl':
+      return 'pl';
+
+    // === ウクライナ語 ===
+    case 'uk':
+      return 'uk';
+
+    // === チェコ語 ===
+    case 'cs':
+      return 'cs';
+
+    // === ハンガリー語 ===
+    case 'hu':
+      return 'hu';
+
+    // === ルーマニア語 ===
+    case 'ro':
+      return 'ro';
+
+    // === ブルガリア語 ===
+    case 'bg':
+      return 'bg';
+
+    // === スロバキア語 ===
+    case 'sk':
+      return 'sk';
+
+    // === クロアチア語 ===
+    case 'hr':
+      return 'hr';
+
+    // === セルビア語 ===
+    case 'sr':
+      return 'sr';
+
+    // === スロベニア語 ===
+    case 'sl':
+      return 'sl';
+
+    // === リトアニア語 ===
+    case 'lt':
+      return 'lt';
+
+    // === ラトビア語 ===
+    case 'lv':
+      return 'lv';
+
+    // === エストニア語 ===
+    case 'et':
+      return 'et';
+
+    // === ギリシャ語 ===
+    case 'el':
+      return 'el';
+
+    // === トルコ語 ===
+    case 'tr':
+      return 'tr';
+
+    // === グルジア語 ===
+    case 'ka':
+      return 'ka';
+
+    // === アラビア語 ===
+    case 'ar':
+      return 'ar';
+
+    // === ヘブライ語 ===
+    case 'he':
+      return 'he';
+
+    // === ペルシャ語 ===
+    case 'fa':
+      return 'fa';
+
+    // === クルド語 ===
+    case 'ku':
+      return 'ku';
+
+    // === アムハラ語 ===
+    case 'am':
+      return 'am';
+
+    // === イディッシュ語 ===
+    case 'yi':
+      return 'yi';
+
+    // === スワヒリ語 ===
+    case 'sw':
+      return 'sw';
+
+    // === ズールー語 ===
+    case 'zu':
+      return 'zu';
+
+    // === コーサ語 ===
+    case 'xh':
+      return 'xh';
+
+    // === チェワ語 ===
+    case 'ny':
+      return 'ny';
+
+    // === ハウサ語 ===
+    case 'ha':
+      return 'ha';
+
+    // === イボ語 ===
+    case 'ig':
+      return 'ig';
+
+    // === ヨルバ語 ===
+    case 'yo':
+      return 'yo';
+
+    // === エスペラント語 ===
+    case 'eo':
+      return 'eo';
+
     default:
-      return code; // 既に 'en', 'ja', 'zh', etc. 対応コードであればそのまま返す
+      // その他、未マッピングのコードはそのまま返す
+      return code;
   }
 }
+
 
 /**
  * STT（音声入力）→ 翻訳 → TTS 再生を担うカスタムフック
  *
- * @param inputLanguage  ブラウザ SpeechRecognition 用の言語コード（例: 'ja-JP', 'en-US'）
+ * @param inputLanguage  STT 用の言語コード（例: 'ja-JP', 'en-US'）
  * @param targetLanguage 翻訳先の言語コード（例: 'ja', 'en', 'zh-HK' 等）
- * @param ttsConfig      TTSの有効/無効や音声の性別などの設定
+ * @param ttsConfig      TTSの有効/無効 & ボイス性別設定
  */
 export function useAudioProcessing(
   inputLanguage: string,
@@ -94,8 +389,7 @@ export function useAudioProcessing(
   const dataArrayRef = useRef<Uint8Array | null>(null);
 
   /**
-   * ブラウザがモバイルの場合 'yue-HK' を 'zh-HK' に変換して SpeechRecognition へ渡す。
-   * （iOS/Androidでの広東語認識サポートの対策）
+   * モバイルで 'yue-HK' を 'zh-HK' に変換（SpeechRecognition対策）
    */
   const getAdjustedLanguageCode = useCallback((code: string) => {
     if (typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
@@ -106,10 +400,9 @@ export function useAudioProcessing(
     return code;
   }, []);
 
-  /**
-   * TTS API (/api/tts) を呼び出して音声を arrayBuffer() で受け取り、
-   * AudioContext で再生する関数
-   */
+  // ===================
+  // TTS再生ロジック
+  // ===================
   const speakText = useCallback(
     async (text: string, lang: string, gender: TTSGender) => {
       if (!ttsConfig.enabled || !text) return;
@@ -117,7 +410,7 @@ export function useAudioProcessing(
       try {
         setTtsState({ isPlaying: true, currentText: text });
 
-        // Cloud Translate / TTS 用に言語コードを変換
+        // TTS用に言語をマッピング
         const translateCode = mapToTranslateCode(lang);
 
         const response = await fetch('/api/tts', {
@@ -125,7 +418,7 @@ export function useAudioProcessing(
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             text,
-            targetLanguage: translateCode,  // route.ts 側で { text, targetLanguage } を期待
+            targetLanguage: translateCode, 
             voiceConfig: { gender },
           }),
         });
@@ -134,10 +427,8 @@ export function useAudioProcessing(
           throw new Error('TTS API request failed');
         }
 
-        // MP3 or WAVなどのバイナリを受け取る
         const audioData = await response.arrayBuffer();
 
-        // AudioContext で再生
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
         const audioBuffer = await audioContext.decodeAudioData(audioData);
 
@@ -159,30 +450,24 @@ export function useAudioProcessing(
     [ttsConfig.enabled]
   );
 
-  /**
-   * メッセージを追加（最大100件まで）
-   */
+  // ===================
+  // メッセージ管理
+  // ===================
   const addMessage = useCallback((newMessage: Message) => {
     setMessages(prev => [...prev, newMessage].slice(-100));
   }, []);
 
-  /**
-   * 会話履歴をクリア
-   */
   const clearConversation = useCallback(() => {
     setMessages([]);
   }, []);
 
-  /**
-   * 翻訳 + TTSを呼び出す関数
-   * /api/translate へ text と targetLanguage を送って翻訳し、翻訳結果を /api/tts で発話
-   */
+  // ===================
+  // 翻訳 + TTS
+  // ===================
   const translateAndSpeak = useCallback(
     async (text: string) => {
       try {
-        // Cloud Translate 用に targetLanguage を変換
         const translateCode = mapToTranslateCode(targetLanguage);
-
         const response = await fetch('/api/translate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -195,7 +480,6 @@ export function useAudioProcessing(
         const data = await response.json();
         const translation = data.translation ?? '';
 
-        // 翻訳メッセージを messages に追加
         const translationMessage: Message = {
           type: 'translation',
           content: translation,
@@ -205,7 +489,7 @@ export function useAudioProcessing(
         };
         addMessage(translationMessage);
 
-        // TTS合成と再生 ( speakText 呼び出し )
+        // TTS合成 & 再生
         if (ttsConfig.enabled) {
           await speakText(translation, targetLanguage, ttsConfig.voiceConfig.gender);
         }
@@ -217,13 +501,12 @@ export function useAudioProcessing(
     [addMessage, speakText, targetLanguage, ttsConfig.enabled, ttsConfig.voiceConfig.gender]
   );
 
-  /**
-   * STT結果（transcript）を受け取り、確定したフレーズごとに translateAndSpeak() を呼ぶ
-   */
+  // ===================
+  // STT（SpeechRecognition）結果処理
+  // ===================
   const processTranscript = useCallback(
     async (transcript: string, isFinal: boolean) => {
       if (transcript.trim()) {
-        // STTの文字起こしを messages に追加
         const newMessage: Message = {
           type: 'transcript',
           content: transcript,
@@ -232,7 +515,6 @@ export function useAudioProcessing(
         };
         addMessage(newMessage);
 
-        // フレーズが確定したら翻訳→TTSへ
         if (isFinal && transcript.length > 0) {
           await translateAndSpeak(transcript);
         }
@@ -241,11 +523,10 @@ export function useAudioProcessing(
     [addMessage, translateAndSpeak]
   );
 
-  /**
-   * 音声認識開始
-   */
+  // ===================
+  // 音声認識開始
+  // ===================
   const startListening = useCallback(() => {
-    // すでに認識中なら停止
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       recognitionRef.current = null;
@@ -266,7 +547,7 @@ export function useAudioProcessing(
       setIsListening(true);
       setError(null);
 
-      // マイク音量解析の初期化
+      // マイク音量計測の初期化
       if (!audioContextRef.current) {
         const audioContext = new AudioContext();
         const analyser = audioContext.createAnalyser();
@@ -289,7 +570,6 @@ export function useAudioProcessing(
               if (analyserRef.current) {
                 source.connect(analyserRef.current);
 
-                // 音量計測をループする関数
                 const updateVolume = () => {
                   if (analyserRef.current && dataArrayRef.current) {
                     analyserRef.current.getByteFrequencyData(dataArrayRef.current);
@@ -330,7 +610,7 @@ export function useAudioProcessing(
 
     recognition.onend = () => {
       setIsListening(false);
-      // 自動再開ロジック
+      // 音声認識の自動再開
       if (recognitionRef.current === recognition) {
         try {
           recognition.start();
@@ -350,9 +630,9 @@ export function useAudioProcessing(
     }
   }, [getAdjustedLanguageCode, inputLanguage, isListening, processTranscript]);
 
-  /**
-   * 音声認識停止
-   */
+  // ===================
+  // 音声認識停止
+  // ===================
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
@@ -368,7 +648,7 @@ export function useAudioProcessing(
     }
   }, []);
 
-  // unmount 時にリスニング停止
+  // コンポーネント unmount 時にリスニング停止
   useEffect(() => {
     return () => {
       stopListening();
