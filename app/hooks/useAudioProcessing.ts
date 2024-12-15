@@ -400,55 +400,60 @@ export function useAudioProcessing(
     return code;
   }, []);
 
-  // ===================
-  // TTS再生ロジック
-  // ===================
-  const speakText = useCallback(
-    async (text: string, lang: string, gender: TTSGender) => {
-      if (!ttsConfig.enabled || !text) return;
+// ===================
+// TTS再生ロジック
+// ===================
+const speakText = useCallback(
+  async (text: string, lang: string, gender: TTSGender) => {
+    if (!ttsConfig.enabled || !text) return;
 
-      try {
-        setTtsState({ isPlaying: true, currentText: text });
+    try {
+      // 再生中フラグをON
+      setTtsState({ isPlaying: true, currentText: text });
 
-        // TTS用に言語をマッピング
-        const translateCode = mapToTranslateCode(lang);
+      // TTS用に言語コードをマッピング ('ja-JP' → 'ja' 等)
+      const translateCode = mapToTranslateCode(lang);
 
-        const response = await fetch('/api/tts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            text,
-            targetLanguage: translateCode, 
-            voiceConfig: { gender },
-          }),
-        });
+      const response = await fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text,
+          targetLanguage: translateCode,  // Cloud TTSが受理可能なコードを送信
+          voiceConfig: { gender },
+        }),
+      });
 
-        if (!response.ok) {
-          throw new Error('TTS API request failed');
-        }
-
-        const audioData = await response.arrayBuffer();
-
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const audioBuffer = await audioContext.decodeAudioData(audioData);
-
-        const source = audioContext.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(audioContext.destination);
-        source.start(0);
-
-        source.onended = () => {
-          setTtsState({ isPlaying: false });
-          audioContext.close();
-        };
-      } catch (err) {
-        console.error('Error in speakText:', err);
-        setError('音声の再生に失敗しました。');
-        setTtsState({ isPlaying: false });
+      if (!response.ok) {
+        throw new Error('TTS API request failed');
       }
-    },
-    [ttsConfig.enabled]
-  );
+
+      // Audioデータ取得
+      const audioData = await response.arrayBuffer();
+
+      // AudioContext で再生
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioBuffer = await audioContext.decodeAudioData(audioData);
+
+      const source = audioContext.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(audioContext.destination);
+      source.start(0);
+
+      // 再生終了処理
+      source.onended = () => {
+        setTtsState({ isPlaying: false });
+        audioContext.close();
+      };
+    } catch (err) {
+      console.error('Error in speakText:', err);
+      setError('音声の再生に失敗しました。');
+      setTtsState({ isPlaying: false });
+    }
+  },
+  [ttsConfig.enabled]
+);
+
 
   // ===================
   // メッセージ管理
