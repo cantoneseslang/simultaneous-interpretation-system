@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
+// TTS の性別指定
 export type TTSGender = 'SSML_VOICE_GENDER_UNSPECIFIED' | 'MALE' | 'FEMALE' | 'NEUTRAL';
 
+// メッセージ形式
 export interface Message {
   type: 'transcript' | 'translation';
   content: string;
@@ -12,16 +14,19 @@ export interface Message {
   status?: 'api' | 'fallback';
 }
 
+// パフォーマンス測定用インターフェース（オプション）
 export interface PerformanceMetrics {
   memoryUsage: number;
   cpuUsage: number;
 }
 
+// TTSの再生状態管理
 interface TtsState {
   isPlaying: boolean;
   currentText?: string;
 }
 
+// TTS設定（有効フラグ＋音声の性別）
 interface TtsConfig {
   enabled: boolean;
   voiceConfig: {
@@ -29,6 +34,7 @@ interface TtsConfig {
   };
 }
 
+// フックの戻り値
 interface UseAudioProcessingReturn {
   isListening: boolean;
   messages: Message[];
@@ -42,11 +48,29 @@ interface UseAudioProcessingReturn {
 }
 
 /**
- * STT（音声入力）→ 翻訳 → TTS 再生を担うフック
+ * Cloud Translate / TTS が対応可能な言語コードに変換するヘルパー関数
+ * - STT 用の 'ja-JP', 'en-US', 'yue-HK' などを適宜 'ja', 'en', 'zh-HK' にマッピング
+ */
+function mapToTranslateCode(code: string): string {
+  switch (code) {
+    case 'ja-JP':
+      return 'ja';
+    case 'en-US':
+      return 'en';
+    case 'yue-HK':
+      return 'zh-HK';
+    // 必要に応じて追加マッピング
+    default:
+      return code; // 既に 'en', 'ja', 'zh', etc. 対応コードであればそのまま返す
+  }
+}
+
+/**
+ * STT（音声入力）→ 翻訳 → TTS 再生を担うカスタムフック
  *
- * @param inputLanguage 入力言語コード（例: 'ja-JP'）
- * @param targetLanguage 翻訳後の言語コード（例: 'en'）
- * @param ttsConfig TTS有効/無効やボイス設定
+ * @param inputLanguage  ブラウザ SpeechRecognition 用の言語コード（例: 'ja-JP', 'en-US'）
+ * @param targetLanguage 翻訳先の言語コード（例: 'ja', 'en', 'zh-HK' 等）
+ * @param ttsConfig      TTSの有効/無効や音声の性別などの設定
  */
 export function useAudioProcessing(
   inputLanguage: string,
@@ -63,11 +87,16 @@ export function useAudioProcessing(
   const [currentVolume, setCurrentVolume] = useState(0);
   const [ttsState, setTtsState] = useState<TtsState>({ isPlaying: false });
 
+  // SpeechRecognitionなどの参照
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
 
+  /**
+   * ブラウザがモバイルの場合 'yue-HK' を 'zh-HK' に変換して SpeechRecognition へ渡す。
+   * （iOS/Androidでの広東語認識サポートの対策）
+   */
   const getAdjustedLanguageCode = useCallback((code: string) => {
     if (typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
       if (code === 'yue-HK') {
@@ -78,32 +107,37 @@ export function useAudioProcessing(
   }, []);
 
   /**
-   * TTSを呼んでAudioContextで再生
+   * TTS API (/api/tts) を呼び出して音声を arrayBuffer() で受け取り、
+   * AudioContext で再生する関数
    */
   const speakText = useCallback(
     async (text: string, lang: string, gender: TTSGender) => {
-      if (!ttsConfig.enabled || !text || !lang) return;
+      if (!ttsConfig.enabled || !text) return;
 
       try {
         setTtsState({ isPlaying: true, currentText: text });
+
+        // Cloud Translate / TTS 用に言語コードを変換
+        const translateCode = mapToTranslateCode(lang);
 
         const response = await fetch('/api/tts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             text,
-            language: lang,
-            targetLanguage: lang, // route.tsに合わせてキー名を変更
+            targetLanguage: translateCode,  // route.ts 側で { text, targetLanguage } を期待
             voiceConfig: { gender },
           }),
         });
+
         if (!response.ok) {
           throw new Error('TTS API request failed');
         }
 
+        // MP3 or WAVなどのバイナリを受け取る
         const audioData = await response.arrayBuffer();
 
-        // AudioContextで再生
+        // AudioContext で再生
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
         const audioBuffer = await audioContext.decodeAudioData(audioData);
 
@@ -126,29 +160,33 @@ export function useAudioProcessing(
   );
 
   /**
-   * メッセージを追加（最大100件）
+   * メッセージを追加（最大100件まで）
    */
   const addMessage = useCallback((newMessage: Message) => {
     setMessages(prev => [...prev, newMessage].slice(-100));
   }, []);
 
   /**
-   * 会話履歴クリア
+   * 会話履歴をクリア
    */
   const clearConversation = useCallback(() => {
     setMessages([]);
   }, []);
 
   /**
-   * 翻訳＋TTSを呼ぶ関数
+   * 翻訳 + TTSを呼び出す関数
+   * /api/translate へ text と targetLanguage を送って翻訳し、翻訳結果を /api/tts で発話
    */
   const translateAndSpeak = useCallback(
     async (text: string) => {
       try {
+        // Cloud Translate 用に targetLanguage を変換
+        const translateCode = mapToTranslateCode(targetLanguage);
+
         const response = await fetch('/api/translate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, targetLanguage }),
+          body: JSON.stringify({ text, targetLanguage: translateCode }),
         });
         if (!response.ok) {
           throw new Error('Translation API request failed');
@@ -157,7 +195,7 @@ export function useAudioProcessing(
         const data = await response.json();
         const translation = data.translation ?? '';
 
-        // 翻訳メッセージを追加
+        // 翻訳メッセージを messages に追加
         const translationMessage: Message = {
           type: 'translation',
           content: translation,
@@ -167,7 +205,7 @@ export function useAudioProcessing(
         };
         addMessage(translationMessage);
 
-        // TTS合成と再生
+        // TTS合成と再生 ( speakText 呼び出し )
         if (ttsConfig.enabled) {
           await speakText(translation, targetLanguage, ttsConfig.voiceConfig.gender);
         }
@@ -180,12 +218,12 @@ export function useAudioProcessing(
   );
 
   /**
-   * SpeechRecognitionからの音声認識結果を処理
+   * STT結果（transcript）を受け取り、確定したフレーズごとに translateAndSpeak() を呼ぶ
    */
   const processTranscript = useCallback(
     async (transcript: string, isFinal: boolean) => {
       if (transcript.trim()) {
-        // STT結果を追加
+        // STTの文字起こしを messages に追加
         const newMessage: Message = {
           type: 'transcript',
           content: transcript,
@@ -194,7 +232,7 @@ export function useAudioProcessing(
         };
         addMessage(newMessage);
 
-        // フレーズ確定時に翻訳+TTS
+        // フレーズが確定したら翻訳→TTSへ
         if (isFinal && transcript.length > 0) {
           await translateAndSpeak(transcript);
         }
@@ -207,6 +245,7 @@ export function useAudioProcessing(
    * 音声認識開始
    */
   const startListening = useCallback(() => {
+    // すでに認識中なら停止
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       recognitionRef.current = null;
@@ -250,7 +289,7 @@ export function useAudioProcessing(
               if (analyserRef.current) {
                 source.connect(analyserRef.current);
 
-                // 音量計測ループ
+                // 音量計測をループする関数
                 const updateVolume = () => {
                   if (analyserRef.current && dataArrayRef.current) {
                     analyserRef.current.getByteFrequencyData(dataArrayRef.current);
@@ -281,9 +320,7 @@ export function useAudioProcessing(
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       const result = event.results[event.results.length - 1];
-      const transcript = result[0].transcript;
-      const final = result.isFinal;
-      processTranscript(transcript, final);
+      processTranscript(result[0].transcript, result.isFinal);
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -293,7 +330,7 @@ export function useAudioProcessing(
 
     recognition.onend = () => {
       setIsListening(false);
-      // 自動再開
+      // 自動再開ロジック
       if (recognitionRef.current === recognition) {
         try {
           recognition.start();
@@ -331,7 +368,7 @@ export function useAudioProcessing(
     }
   }, []);
 
-  // コンポーネント unmount 時
+  // unmount 時にリスニング停止
   useEffect(() => {
     return () => {
       stopListening();
