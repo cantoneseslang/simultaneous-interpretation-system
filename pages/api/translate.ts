@@ -3,21 +3,12 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { Translate } from '@google-cloud/translate/build/src/v2';
 
 // 認証情報を適切に処理
-let credentials: any = {};
-
-if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
-  try {
-    credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
-    if (credentials.private_key) {
-      // 改行文字を適切に処理
-      credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
-    }
-  } catch (err) {
-    console.error('Failed to parse credentials JSON:', err);
-    credentials = {};
-  }
-} else {
-  console.error('GOOGLE_APPLICATION_CREDENTIALS_JSON is not set');
+const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS || '{}');
+if (credentials.private_key) {
+  // バックスラッシュとnの組み合わせを実際の改行に変換
+  credentials.private_key = credentials.private_key
+    .replace(/\\n/g, '\n')
+    .replace(/\n/g, '\n');
 }
 
 const translateClient = new Translate({
