@@ -87,14 +87,13 @@ function mapToTranslateCode(code: string): string {
     case 'mo':
       return 'mn';
 
-    // 省略: 他の言語コードのマッピング（同様に続く）
+    // 他の言語コードのマッピング...
 
     default:
       // その他、未マッピングのコードはそのまま返す
       return code;
   }
 }
-
 
 /**
  * STT（音声入力）→ 翻訳 → TTS 再生を担うカスタムフック
@@ -194,7 +193,6 @@ export function useAudioProcessing(
     [ttsConfig.enabled]
   );
 
-
   // ===================
   // メッセージ管理
   // ===================
@@ -221,7 +219,10 @@ export function useAudioProcessing(
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text, targetLanguage: translateCode }),
         });
+
         if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Translation API request failed:', errorText);
           throw new Error('Translation API request failed');
         }
 
