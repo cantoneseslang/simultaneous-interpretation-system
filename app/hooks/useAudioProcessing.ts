@@ -141,54 +141,78 @@ export function useAudioProcessing(
   const speakText = useCallback(
     async (text: string, lang: string, gender: TTSGender) => {
       if (!ttsConfig.enabled || !text) return;
-
+  
+      let audioContext: AudioContext | null = null;
+      let source: AudioBufferSourceNode | null = null;
+  
       try {
-        // 再生中フラグをON
         setTtsState({ isPlaying: true, currentText: text });
-
-        // TTS用に言語コードをマッピング ('ja-JP' → 'ja' 等)
+  
         const translateCode = mapToTranslateCode(lang);
         console.log('speakText - Target language code:', translateCode);
         console.log('speakText - Text to speak:', text);
-
+  
         const response = await fetch('/api/tts', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             text,
-            targetLanguage: translateCode,  // 【修正】キー名を 'targetLanguage' に統一
+            targetLanguage: translateCode,
             voiceConfig: { gender },
           }),
         });
-
+  
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('TTS API request failed:', errorText);
-          throw new Error('TTS API request failed');
+          console.error('TTS API request failed:', errorText, response.status);
+          throw new Error(`TTS API request failed: ${response.status}`);
         }
-
-        // Audioデータ取得
+  
         const audioData = await response.arrayBuffer();
-
-        // AudioContext で再生
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        console.log('Audio data received:', audioData.byteLength, 'bytes');
+  
+        audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        if (audioContext.state === 'suspended') {
+          await audioContext.resume();
+        }
+  
         const audioBuffer = await audioContext.decodeAudioData(audioData);
-
-        const source = audioContext.createBufferSource();
+        source = audioContext.createBufferSource();
         source.buffer = audioBuffer;
         source.connect(audioContext.destination);
-        source.start(0);
-
+  
         // 再生終了処理
         source.onended = () => {
           setTtsState({ isPlaying: false });
-          audioContext.close();
+          if (audioContext) {
+            audioContext.close().catch(console.error);
+          }
         };
+  
+        await source.start(0);
+  
       } catch (err) {
         console.error('Error in speakText:', err);
         setError('音声の再生に失敗しました。');
         setTtsState({ isPlaying: false });
+        if (audioContext) {
+          audioContext.close().catch(console.error);
+        }
       }
+  
+      // クリーンアップ関数
+      return () => {
+        if (source) {
+          try {
+            source.stop();
+          } catch (err) {
+            console.error('Error stopping audio source:', err);
+          }
+        }
+        if (audioContext) {
+          audioContext.close().catch(console.error);
+        }
+      };
     },
     [ttsConfig.enabled]
   );
