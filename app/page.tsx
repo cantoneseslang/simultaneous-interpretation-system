@@ -9,6 +9,7 @@ import { Switch } from '../components/ui/switch'
 import { Slider } from '../components/ui/slider'
 import { Settings2, LayoutListIcon as LayoutSideBySide, LayoutGridIcon as LayoutVertical, RotateCcw, Maximize2, Volume2, VolumeX } from 'lucide-react'
 import { useAudioProcessing } from './hooks/useAudioProcessing'
+import type { TTSGender } from './hooks/useAudioProcessing'
 import { VolumeGauge } from './components/VolumeGauge'
 
 type LayoutMode = 'side-by-side' | 'vertical' | 'inverse' | 'translation-only';
@@ -24,7 +25,7 @@ export default function SimultaneousInterpretationSystem() {
   const japaneseMessagesEndRef = useRef<HTMLDivElement>(null)
   const translatedMessagesEndRef = useRef<HTMLDivElement>(null)
   const [ttsEnabled, setTtsEnabled] = useState(true)
-  const [voiceGender, setVoiceGender] = useState<'MALE' | 'FEMALE'>('FEMALE')
+  const [voiceGender, setVoiceGender] = useState<TTSGender>('FEMALE')
   const [isMobileDevice, setIsMobileDevice] = useState(false)
 
   useEffect(() => {
@@ -422,17 +423,19 @@ export default function SimultaneousInterpretationSystem() {
 
         {/* 性別選択 */}
         <Select
-            value={voiceGender}
-            onValueChange={(value: 'MALE' | 'FEMALE') => setVoiceGender(value)}
-        >
-            <SelectTrigger className="w-[100px]">
-                <SelectValue placeholder="音声" />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value="FEMALE">👩 女性</SelectItem>
-                <SelectItem value="MALE">👨 男性</SelectItem>
-            </SelectContent>
-        </Select>
+    value={voiceGender}
+    onValueChange={(value: TTSGender) => setVoiceGender(value)}
+>
+    <SelectTrigger className="w-[100px]">
+        <SelectValue placeholder="音声" />
+    </SelectTrigger>
+    <SelectContent>
+        <SelectItem value="FEMALE">👩 女性</SelectItem>
+        <SelectItem value="MALE">👨 男性</SelectItem>
+        <SelectItem value="NEUTRAL">🤖 ニュートラル</SelectItem>
+        <SelectItem value="SSML_VOICE_GENDER_UNSPECIFIED">⚡ 自動</SelectItem>
+    </SelectContent>
+</Select>
 
         {/* 音声オン/オフボタン */}
         <Button

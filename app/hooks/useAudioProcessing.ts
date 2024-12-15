@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { debounce } from 'lodash';
 
+export type TTSGender = 'SSML_VOICE_GENDER_UNSPECIFIED' | 'MALE' | 'FEMALE' | 'NEUTRAL';
+
 export interface Message {
   type: 'transcript' | 'translation';
   content: string;
@@ -24,7 +26,7 @@ interface TtsState {
 interface TtsConfig {
   enabled: boolean;
   voiceConfig: {
-    gender: 'MALE' | 'FEMALE';
+    gender: TTSGender;
   };
 }
 
@@ -62,7 +64,7 @@ export function useAudioProcessing(
   };
 
   const speakText = useCallback(
-    async (text: string, lang: string, gender: 'MALE' | 'FEMALE') => {
+    async (text: string, lang: string, gender: TTSGender) => {
       if (!ttsConfig.enabled || !text || !lang) {
         return;
       }
@@ -123,7 +125,6 @@ export function useAudioProcessing(
   const debouncedTranslate = useMemo(
     () =>
       debounce(async (text: string, isFinal: boolean) => {
-        // Skip if the text is the same as the last translated text
         if (text.trim() === lastTranslatedTextRef.current.trim()) {
           return;
         }
