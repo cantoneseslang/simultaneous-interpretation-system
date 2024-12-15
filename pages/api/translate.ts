@@ -1,29 +1,23 @@
 // pages/api/translate.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Translate } from '@google-cloud/translate/build/src/v2';
-import fs from 'fs';
 
 // 認証情報を適切に処理
 let credentials: any = {};
-if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-  if (process.env.GOOGLE_APPLICATION_CREDENTIALS.trim().startsWith('{')) {
-    // 環境変数がJSON文字列の場合
-    credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-  } else {
-    // 環境変数がファイルパスの場合
-    try {
-      const credentialsJson = fs.readFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'utf-8');
-      credentials = JSON.parse(credentialsJson);
-    } catch (err) {
-      console.error('Failed to read credentials file:', err);
-      credentials = {};
-    }
-  }
 
-  if (credentials.private_key) {
-    // 改行文字を適切に処理
-    credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+  try {
+    credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+    if (credentials.private_key) {
+      // 改行文字を適切に処理
+      credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
+    }
+  } catch (err) {
+    console.error('Failed to parse credentials JSON:', err);
+    credentials = {};
   }
+} else {
+  console.error('GOOGLE_APPLICATION_CREDENTIALS_JSON is not set');
 }
 
 const translateClient = new Translate({
