@@ -1,13 +1,29 @@
+// pages/api/translate.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Translate } from '@google-cloud/translate/build/src/v2';
+import fs from 'fs';
 
 // 認証情報を適切に処理
-const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS || '{}');
-if (credentials.private_key) {
-  // バックスラッシュとnの組み合わせを実際の改行に変換
-  credentials.private_key = credentials.private_key
-    .replace(/\\n/g, '\n')
-    .replace(/\n/g, '\n');
+let credentials: any = {};
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  if (process.env.GOOGLE_APPLICATION_CREDENTIALS.trim().startsWith('{')) {
+    // 環境変数がJSON文字列の場合
+    credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+  } else {
+    // 環境変数がファイルパスの場合
+    try {
+      const credentialsJson = fs.readFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'utf-8');
+      credentials = JSON.parse(credentialsJson);
+    } catch (err) {
+      console.error('Failed to read credentials file:', err);
+      credentials = {};
+    }
+  }
+
+  if (credentials.private_key) {
+    // 改行文字を適切に処理
+    credentials.private_key = credentials.private_key.replace(/\\n/g, '\n');
+  }
 }
 
 const translateClient = new Translate({
