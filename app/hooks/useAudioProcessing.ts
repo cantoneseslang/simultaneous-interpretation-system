@@ -93,6 +93,7 @@ export function useAudioProcessing(
           body: JSON.stringify({
             text,
             language: lang,
+            targetLanguage: lang, // route.tsに合わせてキー名を変更
             voiceConfig: { gender },
           }),
         });
