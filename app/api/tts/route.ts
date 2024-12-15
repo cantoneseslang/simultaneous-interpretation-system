@@ -1,8 +1,8 @@
 // app/api/tts/route.ts
-import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 import { NextResponse } from 'next/server';
+import { TranslationServiceClient } from '@google-cloud/translate';
 
-// Google Cloud TTSでサポートされている言語コードのマッピング
+// サポートされている言語コードのマッピング
 const languageCodeMap = new Map([
   // 東アジア
   ['ja', 'ja-JP'],
@@ -43,39 +43,27 @@ const languageCodeMap = new Map([
 export async function POST(req: Request) {
   try {
     // リクエストボディの取得とバリデーション
-    const { text, language, voiceConfig } = await req.json();
-    
-    if (!text || !language || !voiceConfig) {
-      return NextResponse.json(
-        { error: 'リクエストパラメータが不足しています' },
-        { status: 400 }
-      );
-    }
+    const { text, targetLanguage } = await req.json();
 
-    // 言語コードの変換と検証
-    const languageCode = languageCodeMap.get(language) || language;
-    if (!languageCodeMap.has(language)) {
-      console.error('Unsupported language code:', language);
-      return NextResponse.json(
-        { error: 'この言語は現在音声合成に対応していません' },
-        { status: 400 }
-      );
-    }
-
-    // リクエストの内容をログ
-    console.log('TTS Request:', {
+    console.log('Translation Request:', {
       text,
-      originalLanguage: language,
-      mappedLanguage: languageCode,
-      voiceConfig,
+      targetLanguage
     });
 
-    // 環境変数の存在確認
+    if (!text || !targetLanguage) {
+      console.error('Missing parameters:', { text, targetLanguage });
+      return NextResponse.json(
+        { error: 'テキストまたは対象言語が指定されていません' },
+        { status: 400 }
+      );
+    }
+
+    // 環境変数の検証
     if (!process.env.GOOGLE_PRIVATE_KEY || !process.env.GOOGLE_CLIENT_EMAIL || !process.env.GOOGLE_PROJECT_ID) {
       console.error('Missing environment variables:', {
         hasPrivateKey: !!process.env.GOOGLE_PRIVATE_KEY,
         hasClientEmail: !!process.env.GOOGLE_CLIENT_EMAIL,
-        hasProjectId: !!process.env.GOOGLE_PROJECT_ID,
+        hasProjectId: !!process.env.GOOGLE_PROJECT_ID
       });
       return NextResponse.json(
         { error: '環境変数が設定されていません' },
@@ -86,60 +74,68 @@ export async function POST(req: Request) {
     // private_keyの改行文字を処理
     const privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n');
 
-    // クライアントの初期化
-    const client = new TextToSpeechClient({
+    console.log('Initializing translation client...', {
+      projectId: process.env.GOOGLE_PROJECT_ID,
+      hasPrivateKey: !!privateKey,
+      hasClientEmail: !!process.env.GOOGLE_CLIENT_EMAIL
+    });
+
+    // 翻訳クライアントの初期化
+    const translationClient = new TranslationServiceClient({
       credentials: {
-        client_email: process.env.GOOGLE_CLIENT_EMAIL,
+        client_email: process.env.GOOGLE_CLIENT_EMAIL!,
         private_key: privateKey,
       },
       projectId: process.env.GOOGLE_PROJECT_ID,
     });
 
-    // 音声合成リクエストの実行
-    const [response] = await client.synthesizeSpeech({
-      input: { text },
-      voice: {
-        languageCode,
-        ssmlGender: voiceConfig.gender,
-      },
-      audioConfig: {
-        audioEncoding: 'MP3',
-        speakingRate: 1.0,
-        pitch: 0,
-        volumeGainDb: 0,
-      },
+    // 言語コードの変換と検証
+    const mappedLanguage = languageCodeMap.get(targetLanguage) || targetLanguage;
+
+    console.log('Preparing translation request:', {
+      sourceLang: 'auto',
+      targetLang: mappedLanguage,
+      textLength: text.length
     });
 
-    if (!response.audioContent) {
-      console.error('No audio content received');
+    // 翻訳リクエストの作成
+    const request = {
+      parent: `projects/${process.env.GOOGLE_PROJECT_ID}/locations/global`,
+      contents: [text],
+      mimeType: 'text/plain',
+      sourceLanguageCode: 'auto',
+      targetLanguageCode: mappedLanguage,
+    };
+
+    // 翻訳の実行
+    const [response] = await translationClient.translateText(request);
+
+    if (!response.translations || response.translations.length === 0) {
+      console.error('No translation result received');
       return NextResponse.json(
-        { error: '音声データが生成されませんでした' },
+        { error: '翻訳結果が取得できませんでした' },
         { status: 500 }
       );
     }
 
-    console.log('Successfully generated audio content');
+    console.log('Translation successful:', {
+      sourceText: text,
+      translatedTextLength: response.translations![0].translatedText!.length
+    });
 
-    // 音声データの返送
-    return new Response(response.audioContent, {
-      headers: {
-        'Content-Type': 'audio/mpeg',
-        'Content-Length': response.audioContent.length.toString(),
-        'Cache-Control': 'no-cache',
-      },
+    return NextResponse.json({
+      translation: response.translations![0].translatedText,
     });
 
   } catch (error: any) {
-    // エラーの詳細をログ
-    console.error('TTS Error:', {
+    console.error('Translation error:', {
       message: error.message,
       code: error.code,
       details: error.details,
       stack: error.stack,
-      metadata: error.metadata,
     });
 
-    // 特定のエラーの処理
+    // API制限エラーの処理
     if (error.code === 8) {
       return NextResponse.json(
         {
@@ -151,6 +147,7 @@ export async function POST(req: Request) {
       );
     }
 
+    // 認証エラーの処理
     if (error.code === 16) {
       return NextResponse.json(
         {
@@ -162,15 +159,13 @@ export async function POST(req: Request) {
       );
     }
 
-    // 一般的なエラーレスポンス
+    // 一般的なエラーの処理
     return NextResponse.json(
       {
-        error: 'TTS処理に失敗しました',
+        error: '翻訳に失敗しました',
         message: error.message,
+        details: process.env.NODE_ENV === 'development' ? error.details : undefined,
         code: error.code,
-        details: error.details,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
-        metadata: error.metadata,
       },
       { status: 500 }
     );
