@@ -7,7 +7,15 @@ import { Button } from '../components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
 import { Switch } from '../components/ui/switch'
 import { Slider } from '../components/ui/slider'
-import { Settings2, LayoutListIcon as LayoutSideBySide, LayoutGridIcon as LayoutVertical, RotateCcw, Maximize2, Volume2, VolumeX } from 'lucide-react'
+import {
+  Settings2,
+  LayoutListIcon as LayoutSideBySide,
+  LayoutGridIcon as LayoutVertical,
+  RotateCcw,
+  Maximize2,
+  Volume2,
+  VolumeX
+} from 'lucide-react'
 import { useAudioProcessing } from './hooks/useAudioProcessing'
 import type { TTSGender } from './hooks/useAudioProcessing'
 import { VolumeGauge } from './components/VolumeGauge'
@@ -28,6 +36,9 @@ export default function SimultaneousInterpretationSystem() {
   const [voiceGender, setVoiceGender] = useState<TTSGender>('FEMALE')
   const [isMobileDevice, setIsMobileDevice] = useState(false)
 
+  // === 追加: TTS音声を再生するためのAudio要素Ref ===
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
   useEffect(() => {
     const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
     setIsMobileDevice(isMobile)
@@ -42,12 +53,11 @@ export default function SimultaneousInterpretationSystem() {
     currentVolume,
     error,
     performanceMetrics,
-    ttsState
+    ttsState // ★ TTSの状態をここから受け取る
   } = useAudioProcessing(
     inputLanguage,
     targetLanguage,
     useLocalProcessing,
-    updateInterval,
     voiceThreshold,
     {
       enabled: ttsEnabled,
@@ -76,8 +86,14 @@ export default function SimultaneousInterpretationSystem() {
     }
   }, [stopListening])
 
-  const transcriptMessages = useMemo(() => messages.filter(m => m.type === 'transcript' && m.isFinal), [messages])
-  const translationMessages = useMemo(() => messages.filter(m => m.type === 'translation'), [messages])
+  const transcriptMessages = useMemo(
+    () => messages.filter(m => m.type === 'transcript' && m.isFinal),
+    [messages]
+  )
+  const translationMessages = useMemo(
+    () => messages.filter(m => m.type === 'translation'),
+    [messages]
+  )
 
   const renderLayoutButtons = () => (
     <div className="flex gap-2">
@@ -333,126 +349,126 @@ export default function SimultaneousInterpretationSystem() {
             </div>
 
             {/* 2行目：出力翻訳言語選択と同時通訳開始ボタン */}
-<div className="flex items-center justify-between gap-2">
-    <Button
-        onClick={toggleListening}
-        variant={isListening ? "destructive" : "default"}
-    >
-        {isListening ? "停止" : "出力翻訳言語"}
-    </Button>
+            <div className="flex items-center justify-between gap-2">
+              <Button
+                onClick={toggleListening}
+                variant={isListening ? "destructive" : "default"}
+              >
+                {isListening ? "停止" : "出力翻訳言語"}
+              </Button>
 
-    <div className="flex items-center gap-2">
-        {/* 言語選択 */}
-        <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-            <SelectTrigger>
-                <SelectValue placeholder="言語を選択" />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value="ja">日本語</SelectItem>
-                <SelectItem value="en">英語</SelectItem>
-                <SelectItem value="zh">中国語（簡体字）</SelectItem>
-                <SelectItem value="zh-HK">広東語（繁体字）</SelectItem>
-                <SelectItem value="zh-TW">台湾中国語（繁体字）</SelectItem>
-                <SelectItem value="ko">韓国語</SelectItem>
-                <SelectItem value="mo">モンゴル語</SelectItem>
-                <SelectItem value="vi">ベトナム語</SelectItem>
-                <SelectItem value="th">タイ語</SelectItem>
-                <SelectItem value="ms">マレー語</SelectItem>
-                <SelectItem value="id">インドネシア語</SelectItem>
-                <SelectItem value="fil">フィリピン語</SelectItem>
-                <SelectItem value="my">ミャンマー語</SelectItem>
-                <SelectItem value="km">クメール語</SelectItem>
-                <SelectItem value="lo">ラオ語</SelectItem>
-                <SelectItem value="tl">タガログ語</SelectItem>
-                <SelectItem value="hi">ヒンディー語</SelectItem>
-                <SelectItem value="bn">ベンガル語</SelectItem>
-                <SelectItem value="ur">ウルドゥー語</SelectItem>
-                <SelectItem value="ta">タミル語</SelectItem>
-                <SelectItem value="te">テルグ語</SelectItem>
-                <SelectItem value="mr">マラーティー語</SelectItem>
-                <SelectItem value="gu">グジャラーティー語</SelectItem>
-                <SelectItem value="kn">カンナダ語</SelectItem>
-                <SelectItem value="ml">マラヤーラム語</SelectItem>
-                <SelectItem value="pa">パンジャーブ語</SelectItem>
-                <SelectItem value="or">オリヤー語</SelectItem>
-                <SelectItem value="si">シンハラ語</SelectItem>
-                <SelectItem value="fr">フランス語</SelectItem>
-                <SelectItem value="de">ドイツ語</SelectItem>
-                <SelectItem value="es">スペイン語</SelectItem>
-                <SelectItem value="it">イタリア語</SelectItem>
-                <SelectItem value="pt">ポルトガル語</SelectItem>
-                <SelectItem value="nl">オランダ語</SelectItem>
-                <SelectItem value="sv">スウェーデン語</SelectItem>
-                <SelectItem value="da">デンマーク語</SelectItem>
-                <SelectItem value="no">ノルウェー語</SelectItem>
-                <SelectItem value="fi">フィンランド語</SelectItem>
-                <SelectItem value="is">アイスランド語</SelectItem>
-                <SelectItem value="ru">ロシア語</SelectItem>
-                <SelectItem value="pl">ポーランド語</SelectItem>
-                <SelectItem value="uk">ウクライナ語</SelectItem>
-                <SelectItem value="cs">チェコ語</SelectItem>
-                <SelectItem value="hu">ハンガリー語</SelectItem>
-                <SelectItem value="ro">ルーマニア語</SelectItem>
-                <SelectItem value="bg">ブルガリア語</SelectItem>
-                <SelectItem value="sk">スロバキア語</SelectItem>
-                <SelectItem value="hr">クロアチア語</SelectItem>
-                <SelectItem value="sr">セルビア語</SelectItem>
-                <SelectItem value="sl">スロベニア語</SelectItem>
-                <SelectItem value="lt">リトアニア語</SelectItem>
-                <SelectItem value="lv">ラトビア語</SelectItem>
-                <SelectItem value="et">エストニア語</SelectItem>
-                <SelectItem value="el">ギリシャ語</SelectItem>
-                <SelectItem value="tr">トルコ語</SelectItem>
-                <SelectItem value="ka">グルジア語</SelectItem>
-                <SelectItem value="ar">アラビア語</SelectItem>
-                <SelectItem value="he">ヘブライ語</SelectItem>
-                <SelectItem value="fa">ペルシャ語</SelectItem>
-                <SelectItem value="ku">クルド語</SelectItem>
-                <SelectItem value="am">アムハラ語</SelectItem>
-                <SelectItem value="yi">イディッシュ語</SelectItem>
-                <SelectItem value="sw">スワヒリ語</SelectItem>
-                <SelectItem value="zu">ズールー語</SelectItem>
-                <SelectItem value="xh">コーサ語</SelectItem>
-                <SelectItem value="ny">チェワ語</SelectItem>
-                <SelectItem value="ha">ハウサ語</SelectItem>
-                <SelectItem value="ig">イボ語</SelectItem>
-                <SelectItem value="yo">ヨルバ語</SelectItem>
-                <SelectItem value="eo">エスペラント語</SelectItem>
-            </SelectContent>
-        </Select>
+              <div className="flex items-center gap-2">
+                {/* 言語選択 */}
+                <Select value={targetLanguage} onValueChange={setTargetLanguage}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="言語を選択" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ja">日本語</SelectItem>
+                    <SelectItem value="en">英語</SelectItem>
+                    <SelectItem value="zh">中国語（簡体字）</SelectItem>
+                    <SelectItem value="zh-HK">広東語（繁体字）</SelectItem>
+                    <SelectItem value="zh-TW">台湾中国語（繁体字）</SelectItem>
+                    <SelectItem value="ko">韓国語</SelectItem>
+                    <SelectItem value="mo">モンゴル語</SelectItem>
+                    <SelectItem value="vi">ベトナム語</SelectItem>
+                    <SelectItem value="th">タイ語</SelectItem>
+                    <SelectItem value="ms">マレー語</SelectItem>
+                    <SelectItem value="id">インドネシア語</SelectItem>
+                    <SelectItem value="fil">フィリピン語</SelectItem>
+                    <SelectItem value="my">ミャンマー語</SelectItem>
+                    <SelectItem value="km">クメール語</SelectItem>
+                    <SelectItem value="lo">ラオ語</SelectItem>
+                    <SelectItem value="tl">タガログ語</SelectItem>
+                    <SelectItem value="hi">ヒンディー語</SelectItem>
+                    <SelectItem value="bn">ベンガル語</SelectItem>
+                    <SelectItem value="ur">ウルドゥー語</SelectItem>
+                    <SelectItem value="ta">タミル語</SelectItem>
+                    <SelectItem value="te">テルグ語</SelectItem>
+                    <SelectItem value="mr">マラーティー語</SelectItem>
+                    <SelectItem value="gu">グジャラーティー語</SelectItem>
+                    <SelectItem value="kn">カンナダ語</SelectItem>
+                    <SelectItem value="ml">マラヤーラム語</SelectItem>
+                    <SelectItem value="pa">パンジャーブ語</SelectItem>
+                    <SelectItem value="or">オリヤー語</SelectItem>
+                    <SelectItem value="si">シンハラ語</SelectItem>
+                    <SelectItem value="fr">フランス語</SelectItem>
+                    <SelectItem value="de">ドイツ語</SelectItem>
+                    <SelectItem value="es">スペイン語</SelectItem>
+                    <SelectItem value="it">イタリア語</SelectItem>
+                    <SelectItem value="pt">ポルトガル語</SelectItem>
+                    <SelectItem value="nl">オランダ語</SelectItem>
+                    <SelectItem value="sv">スウェーデン語</SelectItem>
+                    <SelectItem value="da">デンマーク語</SelectItem>
+                    <SelectItem value="no">ノルウェー語</SelectItem>
+                    <SelectItem value="fi">フィンランド語</SelectItem>
+                    <SelectItem value="is">アイスランド語</SelectItem>
+                    <SelectItem value="ru">ロシア語</SelectItem>
+                    <SelectItem value="pl">ポーランド語</SelectItem>
+                    <SelectItem value="uk">ウクライナ語</SelectItem>
+                    <SelectItem value="cs">チェコ語</SelectItem>
+                    <SelectItem value="hu">ハンガリー語</SelectItem>
+                    <SelectItem value="ro">ルーマニア語</SelectItem>
+                    <SelectItem value="bg">ブルガリア語</SelectItem>
+                    <SelectItem value="sk">スロバキア語</SelectItem>
+                    <SelectItem value="hr">クロアチア語</SelectItem>
+                    <SelectItem value="sr">セルビア語</SelectItem>
+                    <SelectItem value="sl">スロベニア語</SelectItem>
+                    <SelectItem value="lt">リトアニア語</SelectItem>
+                    <SelectItem value="lv">ラトビア語</SelectItem>
+                    <SelectItem value="et">エストニア語</SelectItem>
+                    <SelectItem value="el">ギリシャ語</SelectItem>
+                    <SelectItem value="tr">トルコ語</SelectItem>
+                    <SelectItem value="ka">グルジア語</SelectItem>
+                    <SelectItem value="ar">アラビア語</SelectItem>
+                    <SelectItem value="he">ヘブライ語</SelectItem>
+                    <SelectItem value="fa">ペルシャ語</SelectItem>
+                    <SelectItem value="ku">クルド語</SelectItem>
+                    <SelectItem value="am">アムハラ語</SelectItem>
+                    <SelectItem value="yi">イディッシュ語</SelectItem>
+                    <SelectItem value="sw">スワヒリ語</SelectItem>
+                    <SelectItem value="zu">ズールー語</SelectItem>
+                    <SelectItem value="xh">コーサ語</SelectItem>
+                    <SelectItem value="ny">チェワ語</SelectItem>
+                    <SelectItem value="ha">ハウサ語</SelectItem>
+                    <SelectItem value="ig">イボ語</SelectItem>
+                    <SelectItem value="yo">ヨルバ語</SelectItem>
+                    <SelectItem value="eo">エスペラント語</SelectItem>
+                  </SelectContent>
+                </Select>
 
-        {/* 性別選択 */}
-        <Select
-    value={voiceGender}
-    onValueChange={(value: TTSGender) => setVoiceGender(value)}
->
-    <SelectTrigger className="w-[100px]">
-        <SelectValue placeholder="音声" />
-    </SelectTrigger>
-    <SelectContent>
-        <SelectItem value="FEMALE">👩 女性</SelectItem>
-        <SelectItem value="MALE">👨 男性</SelectItem>
-        <SelectItem value="NEUTRAL">🤖 ニュートラル</SelectItem>
-        <SelectItem value="SSML_VOICE_GENDER_UNSPECIFIED">⚡ 自動</SelectItem>
-    </SelectContent>
-</Select>
+                {/* 性別選択 */}
+                <Select
+                  value={voiceGender}
+                  onValueChange={(value: TTSGender) => setVoiceGender(value)}
+                >
+                  <SelectTrigger className="w-[100px]">
+                    <SelectValue placeholder="音声" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FEMALE">👩 女性</SelectItem>
+                    <SelectItem value="MALE">👨 男性</SelectItem>
+                    <SelectItem value="NEUTRAL">🤖 ニュートラル</SelectItem>
+                    <SelectItem value="SSML_VOICE_GENDER_UNSPECIFIED">⚡ 自動</SelectItem>
+                  </SelectContent>
+                </Select>
 
-        {/* 音声オン/オフボタン */}
-        <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTtsEnabled(!ttsEnabled)}
-            className={`${ttsEnabled ? 'text-blue-500' : 'text-gray-400'}`}
-            title={ttsEnabled ? '音声出力ON' : '音声出力OFF'}
-        >
-            {ttsEnabled ? (
-                <Volume2 className="h-4 w-4" />
-            ) : (
-                <VolumeX className="h-4 w-4" />
-            )}
-        </Button>
-    </div>
-</div>
+                {/* 音声オン/オフボタン */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setTtsEnabled(!ttsEnabled)}
+                  className={`${ttsEnabled ? 'text-blue-500' : 'text-gray-400'}`}
+                  title={ttsEnabled ? '音声出力ON' : '音声出力OFF'}
+                >
+                  {ttsEnabled ? (
+                    <Volume2 className="h-4 w-4" />
+                  ) : (
+                    <VolumeX className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
 
             {/* 3行目：表示切り替えボタン類 */}
             <div className="flex justify-center gap-4 items-center">
@@ -616,6 +632,9 @@ export default function SimultaneousInterpretationSystem() {
           </div>
         )}
       </div>
+
+      {/* === 追加: 実際にTTS音声を出力するaudio要素 === */}
+      <audio ref={audioRef} hidden />
     </div>
   )
 }
