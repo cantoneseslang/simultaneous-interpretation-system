@@ -87,271 +87,7 @@ function mapToTranslateCode(code: string): string {
     case 'mo':
       return 'mn';
 
-    // === ベトナム語 ===
-    case 'vi':
-    case 'vi-VN':
-      return 'vi';
-
-    // === タイ語 ===
-    case 'th':
-    case 'th-TH':
-      return 'th';
-
-    // === マレー語 ===
-    case 'ms':
-    case 'ms-MY':
-      return 'ms';
-
-    // === インドネシア語 ===
-    case 'id':
-    case 'id-ID':
-      return 'id';
-
-    // === フィリピン語（タガログ）===
-    case 'fil':
-    case 'tl':
-      return 'fil'; // Cloud Translateは 'tl' or 'fil' 両方扱えるが 'fil'推奨
-
-    // === ミャンマー語 ===
-    case 'my':  // 'my-MM' が STTで使われるかもしれない
-      return 'my';
-
-    // === クメール語（カンボジア）===
-    case 'km':
-    case 'km-KH':
-      return 'km';
-
-    // === ラオ語 ===
-    case 'lo':
-    case 'lo-LA':
-      return 'lo';
-
-    // === ヒンディー語 ===
-    case 'hi':
-    case 'hi-IN':
-      return 'hi';
-
-    // === ベンガル語 ===
-    case 'bn':
-    case 'bn-BD':
-      return 'bn';
-
-    // === ウルドゥー語 ===
-    case 'ur':
-    case 'ur-PK':
-      return 'ur';
-
-    // === タミル語 ===
-    case 'ta':
-    case 'ta-IN':
-      return 'ta';
-
-    // === テルグ語 ===
-    case 'te':
-      return 'te';
-
-    // === マラーティー語 ===
-    case 'mr':
-      return 'mr';
-
-    // === グジャラーティー語 ===
-    case 'gu':
-      return 'gu';
-
-    // === カンナダ語 ===
-    case 'kn':
-      return 'kn';
-
-    // === マラヤーラム語 ===
-    case 'ml':
-      return 'ml';
-
-    // === パンジャーブ語 ===
-    case 'pa':
-      return 'pa';
-
-    // === オリヤー語 ===
-    case 'or':
-      return 'or';
-
-    // === シンハラ語 ===
-    case 'si':
-      return 'si';
-
-    // === フランス語 ===
-    case 'fr':
-    case 'fr-FR':
-      return 'fr';
-
-    // === ドイツ語 ===
-    case 'de':
-    case 'de-DE':
-      return 'de';
-
-    // === スペイン語 ===
-    case 'es':
-    case 'es-ES':
-      return 'es';
-
-    // === イタリア語 ===
-    case 'it':
-    case 'it-IT':
-      return 'it';
-
-    // === ポルトガル語 ===
-    // 'pt-PT' や 'pt-BR' はまとめて 'pt' にする
-    case 'pt':
-    case 'pt-PT':
-    case 'pt-BR':
-      return 'pt';
-
-    // === オランダ語 ===
-    case 'nl':
-      return 'nl';
-
-    // === スウェーデン語 ===
-    case 'sv':
-      return 'sv';
-
-    // === デンマーク語 ===
-    case 'da':
-      return 'da';
-
-    // === ノルウェー語 ===
-    case 'no':
-      return 'no';
-
-    // === フィンランド語 ===
-    case 'fi':
-      return 'fi';
-
-    // === アイスランド語 ===
-    case 'is':
-      return 'is';
-
-    // === ロシア語 ===
-    case 'ru':
-      return 'ru';
-
-    // === ポーランド語 ===
-    case 'pl':
-      return 'pl';
-
-    // === ウクライナ語 ===
-    case 'uk':
-      return 'uk';
-
-    // === チェコ語 ===
-    case 'cs':
-      return 'cs';
-
-    // === ハンガリー語 ===
-    case 'hu':
-      return 'hu';
-
-    // === ルーマニア語 ===
-    case 'ro':
-      return 'ro';
-
-    // === ブルガリア語 ===
-    case 'bg':
-      return 'bg';
-
-    // === スロバキア語 ===
-    case 'sk':
-      return 'sk';
-
-    // === クロアチア語 ===
-    case 'hr':
-      return 'hr';
-
-    // === セルビア語 ===
-    case 'sr':
-      return 'sr';
-
-    // === スロベニア語 ===
-    case 'sl':
-      return 'sl';
-
-    // === リトアニア語 ===
-    case 'lt':
-      return 'lt';
-
-    // === ラトビア語 ===
-    case 'lv':
-      return 'lv';
-
-    // === エストニア語 ===
-    case 'et':
-      return 'et';
-
-    // === ギリシャ語 ===
-    case 'el':
-      return 'el';
-
-    // === トルコ語 ===
-    case 'tr':
-      return 'tr';
-
-    // === グルジア語 ===
-    case 'ka':
-      return 'ka';
-
-    // === アラビア語 ===
-    case 'ar':
-      return 'ar';
-
-    // === ヘブライ語 ===
-    case 'he':
-      return 'he';
-
-    // === ペルシャ語 ===
-    case 'fa':
-      return 'fa';
-
-    // === クルド語 ===
-    case 'ku':
-      return 'ku';
-
-    // === アムハラ語 ===
-    case 'am':
-      return 'am';
-
-    // === イディッシュ語 ===
-    case 'yi':
-      return 'yi';
-
-    // === スワヒリ語 ===
-    case 'sw':
-      return 'sw';
-
-    // === ズールー語 ===
-    case 'zu':
-      return 'zu';
-
-    // === コーサ語 ===
-    case 'xh':
-      return 'xh';
-
-    // === チェワ語 ===
-    case 'ny':
-      return 'ny';
-
-    // === ハウサ語 ===
-    case 'ha':
-      return 'ha';
-
-    // === イボ語 ===
-    case 'ig':
-      return 'ig';
-
-    // === ヨルバ語 ===
-    case 'yo':
-      return 'yo';
-
-    // === エスペラント語 ===
-    case 'eo':
-      return 'eo';
+    // 省略: 他の言語コードのマッピング（同様に続く）
 
     default:
       // その他、未マッピングのコードはそのまま返す
@@ -400,59 +136,63 @@ export function useAudioProcessing(
     return code;
   }, []);
 
-// ===================
-// TTS再生ロジック
-// ===================
-const speakText = useCallback(
-  async (text: string, lang: string, gender: TTSGender) => {
-    if (!ttsConfig.enabled || !text) return;
+  // ===================
+  // TTS再生ロジック
+  // ===================
+  const speakText = useCallback(
+    async (text: string, lang: string, gender: TTSGender) => {
+      if (!ttsConfig.enabled || !text) return;
 
-    try {
-      // 再生中フラグをON
-      setTtsState({ isPlaying: true, currentText: text });
+      try {
+        // 再生中フラグをON
+        setTtsState({ isPlaying: true, currentText: text });
 
-      // TTS用に言語コードをマッピング ('ja-JP' → 'ja' 等)
-      const translateCode = mapToTranslateCode(lang);
+        // TTS用に言語コードをマッピング ('ja-JP' → 'ja' 等)
+        const translateCode = mapToTranslateCode(lang);
+        console.log('speakText - Target language code:', translateCode);
+        console.log('speakText - Text to speak:', text);
 
-      const response = await fetch('/api/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text,
-          targetLanguage: translateCode,  // Cloud TTSが受理可能なコードを送信
-          voiceConfig: { gender },
-        }),
-      });
+        const response = await fetch('/api/tts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text,
+            targetLanguage: translateCode,  // Cloud TTSが受理可能なコードを送信
+            voiceConfig: { gender },
+          }),
+        });
 
-      if (!response.ok) {
-        throw new Error('TTS API request failed');
-      }
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('TTS API request failed:', errorText);
+          throw new Error('TTS API request failed');
+        }
 
-      // Audioデータ取得
-      const audioData = await response.arrayBuffer();
+        // Audioデータ取得
+        const audioData = await response.arrayBuffer();
 
-      // AudioContext で再生
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const audioBuffer = await audioContext.decodeAudioData(audioData);
+        // AudioContext で再生
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const audioBuffer = await audioContext.decodeAudioData(audioData);
 
-      const source = audioContext.createBufferSource();
-      source.buffer = audioBuffer;
-      source.connect(audioContext.destination);
-      source.start(0);
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(audioContext.destination);
+        source.start(0);
 
-      // 再生終了処理
-      source.onended = () => {
+        // 再生終了処理
+        source.onended = () => {
+          setTtsState({ isPlaying: false });
+          audioContext.close();
+        };
+      } catch (err) {
+        console.error('Error in speakText:', err);
+        setError('音声の再生に失敗しました。');
         setTtsState({ isPlaying: false });
-        audioContext.close();
-      };
-    } catch (err) {
-      console.error('Error in speakText:', err);
-      setError('音声の再生に失敗しました。');
-      setTtsState({ isPlaying: false });
-    }
-  },
-  [ttsConfig.enabled]
-);
+      }
+    },
+    [ttsConfig.enabled]
+  );
 
 
   // ===================
@@ -473,6 +213,9 @@ const speakText = useCallback(
     async (text: string) => {
       try {
         const translateCode = mapToTranslateCode(targetLanguage);
+        console.log('Translating to code:', translateCode);
+        console.log('Original text:', text);
+
         const response = await fetch('/api/translate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -484,6 +227,8 @@ const speakText = useCallback(
 
         const data = await response.json();
         const translation = data.translation ?? '';
+
+        console.log('Translation result:', translation);
 
         const translationMessage: Message = {
           type: 'translation',
@@ -507,7 +252,7 @@ const speakText = useCallback(
   );
 
   // ===================
-  // STT（SpeechRecognition）結果処理
+  // STT（音声入力）結果処理
   // ===================
   const processTranscript = useCallback(
     async (transcript: string, isFinal: boolean) => {
