@@ -251,44 +251,48 @@ export function useAudioProcessing(
     async (text: string) => {
       try {
         const translateCode = mapToTranslateCode(targetLanguage);
-        console.log('Translating to code:', translateCode);
-        console.log('Original text:', text);
-
-        // 広東語処理の追加
-        let textToTranslate = text;
-        let isCantonese = false;
-        let originalText;
-
-        if (inputLanguage === 'yue-HK' || inputLanguage === 'zh-HK') {
-          const processed = await processCantonese(text);
-          if (processed.isProcessed) {
-            textToTranslate = processed.text;
-            isCantonese = true;
-            originalText = text;
-          }
-        }
-
+        console.log('Translation process:', {
+          inputLanguage,
+          targetLanguage,
+          translateCode
+        });
+   
+        // 1. まず翻訳を実行
         const response = await fetch('/api/translate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
-            text: textToTranslate, 
-            targetLanguage: translateCode,
-            isCantonese 
+            text, 
+            targetLanguage: translateCode
           }),
         });
-
+   
         if (!response.ok) {
           const errorText = await response.text();
           console.error('Translation API request failed:', errorText);
           throw new Error('Translation API request failed');
         }
-
+   
         const data = await response.json();
-        const translation = data.translation ?? '';
-
+        let translation = data.translation ?? '';
+        let isCantonese = false;
+        let originalText = null;
+   
+        // 2. 広東語の場合、翻訳結果を口語変換
+        if (targetLanguage === 'yue-HK' || targetLanguage === 'zh-HK') {
+          console.log('Cantonese post-processing:', translation);
+          const processed = await processCantonese(translation);
+          if (processed.isProcessed) {
+            originalText = translation;  // 文語体を保存
+            translation = processed.text;  // 口語体に更新
+            isCantonese = true;
+            console.log('Cantonese converted:', translation);
+          }
+        }
+   
         console.log('Translation result:', translation);
-
+   
+        // メッセージの追加と音声合成
         const translationMessage: Message = {
           type: 'translation',
           content: translation,
@@ -299,7 +303,7 @@ export function useAudioProcessing(
           originalText
         };
         addMessage(translationMessage);
-
+   
         if (ttsConfig.enabled) {
           await speakText(translation, targetLanguage, ttsConfig.voiceConfig.gender);
         }
@@ -308,12 +312,13 @@ export function useAudioProcessing(
         setError('翻訳または音声合成でエラーが発生しました。');
       }
     },
-    [addMessage, speakText, targetLanguage, ttsConfig.enabled, ttsConfig.voiceConfig.gender, inputLanguage, processCantonese]
-  );
-  // ===================
-  // STT（音声入力）結果処理
-  // ===================
-  const processTranscript = useCallback(
+    [addMessage, speakText, targetLanguage, ttsConfig.enabled, ttsConfig.voiceConfig.gender, processCantonese]
+   );
+   
+   // ===================
+   // STT（音声入力）結果処理
+   // ===================
+   const processTranscript = useCallback(
     async (transcript: string, isFinal: boolean) => {
       if (transcript.trim()) {
         const newMessage: Message = {
@@ -323,39 +328,39 @@ export function useAudioProcessing(
           isFinal,
         };
         addMessage(newMessage);
-
+   
         if (isFinal && transcript.length > 0) {
           await translateAndSpeak(transcript);
         }
       }
     },
     [addMessage, translateAndSpeak]
-  );
-
-  // ===================
-  // 音声認識開始
-  // ===================
-  const startListening = useCallback(() => {
+   );
+   
+   // ===================
+   // 音声認識開始
+   // ===================
+   const startListening = useCallback(() => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       recognitionRef.current = null;
     }
-
+   
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setError('このブラウザは音声認識をサポートしていません。');
       return;
     }
-
+   
     const recognition = new SpeechRecognition();
     recognition.lang = getAdjustedLanguageCode(inputLanguage);
     recognition.continuous = true;
     recognition.interimResults = true;
-
+   
     recognition.onstart = () => {
       setIsListening(true);
       setError(null);
-
+   
       // マイク音量計測の初期化
       if (!audioContextRef.current) {
         const audioContext = new AudioContext();
@@ -364,13 +369,13 @@ export function useAudioProcessing(
         analyser.minDecibels = -90;
         analyser.maxDecibels = -10;
         analyser.smoothingTimeConstant = 0.85;
-
+   
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
         dataArrayRef.current = dataArray;
         analyserRef.current = analyser;
         audioContextRef.current = audioContext;
-
+   
         navigator.mediaDevices
           .getUserMedia({ audio: true })
           .then(stream => {
@@ -378,18 +383,18 @@ export function useAudioProcessing(
               const source = audioContextRef.current.createMediaStreamSource(stream);
               if (analyserRef.current) {
                 source.connect(analyserRef.current);
-
+   
                 const updateVolume = () => {
                   if (analyserRef.current && dataArrayRef.current) {
                     analyserRef.current.getByteFrequencyData(dataArrayRef.current);
-
+   
                     let sum = 0;
                     for (let i = 0; i < bufferLength; i++) {
                       sum += dataArrayRef.current[i] * dataArrayRef.current[i];
                     }
                     const rms = Math.sqrt(sum / bufferLength);
                     const normalizedVolume = Math.min(rms / 256, 1);
-
+   
                     setCurrentVolume(normalizedVolume);
                   }
                   if (isListening) {
@@ -406,17 +411,17 @@ export function useAudioProcessing(
           });
       }
     };
-
+   
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       const result = event.results[event.results.length - 1];
       processTranscript(result[0].transcript, result.isFinal);
     };
-
+   
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error('Recognition error:', event.error);
       setError(`音声認識エラー: ${event.error}`);
     };
-
+   
     recognition.onend = () => {
       setIsListening(false);
       // 音声認識の自動再開
@@ -429,7 +434,7 @@ export function useAudioProcessing(
         }
       }
     };
-
+   
     try {
       recognition.start();
       recognitionRef.current = recognition;
@@ -437,34 +442,34 @@ export function useAudioProcessing(
       console.error('Recognition start error:', error);
       setError('音声認識の開始に失敗しました。');
     }
-  }, [getAdjustedLanguageCode, inputLanguage, isListening, processTranscript]);
-
-  // ===================
-  // 音声認識停止
-  // ===================
-  const stopListening = useCallback(() => {
+   }, [getAdjustedLanguageCode, inputLanguage, isListening, processTranscript]);
+   
+   // ===================
+   // 音声認識停止
+   // ===================
+   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       recognitionRef.current = null;
     }
     setIsListening(false);
-
+   
     if (audioContextRef.current) {
       audioContextRef.current.close();
       audioContextRef.current = null;
       analyserRef.current = null;
       dataArrayRef.current = null;
     }
-  }, []);
-
-  // コンポーネント unmount 時にリスニング停止
-  useEffect(() => {
+   }, []);
+   
+   // コンポーネント unmount 時にリスニング停止
+   useEffect(() => {
     return () => {
       stopListening();
     };
-  }, [stopListening]);
-
-  return {
+   }, [stopListening]);
+   
+   return {
     isListening,
     messages,
     startListening,
@@ -474,5 +479,5 @@ export function useAudioProcessing(
     performanceMetrics,
     currentVolume,
     ttsState,
-  };
-}
+   };
+  }
