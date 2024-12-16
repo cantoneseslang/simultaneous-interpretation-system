@@ -12,6 +12,8 @@ export interface Message {
   timestamp: number;
   isFinal: boolean;
   status?: 'api' | 'fallback';
+  isCantonese?: boolean;  // 追加
+  originalText?: string;  // 追加
 }
 
 // パフォーマンス測定用（不要なら削除可）
@@ -46,7 +48,6 @@ interface UseAudioProcessingReturn {
   currentVolume: number;
   ttsState: TtsState;
 }
-
 /**
  * Cloud Translate / TTS が認識できるISO言語コードにマッピングする関数
  * page.tsx や STT が使用する地域コード（例: 'ja-JP', 'en-US', 'ko-KR', etc.）をまとめて対応
@@ -95,13 +96,6 @@ function mapToTranslateCode(code: string): string {
   }
 }
 
-/**
- * STT（音声入力）→ 翻訳 → TTS 再生を担うカスタムフック
- *
- * @param inputLanguage  STT 用の言語コード（例: 'ja-JP', 'en-US'）
- * @param targetLanguage 翻訳先の言語コード（例: 'ja', 'en', 'zh-HK' 等）
- * @param ttsConfig      TTSの有効/無効 & ボイス性別設定
- */
 export function useAudioProcessing(
   inputLanguage: string,
   targetLanguage: string,
@@ -123,6 +117,30 @@ export function useAudioProcessing(
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
 
+  // 広東語処理用の新しい関数を追加
+  const processCantonese = useCallback(async (text: string) => {
+    try {
+      const response = await fetch('/api/cantonese-process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!response.ok) {
+        console.error('Cantonese processing failed:', response.status);
+        return { text, isProcessed: false };
+      }
+
+      const result = await response.json();
+      return {
+        text: result.processedText,
+        isProcessed: true
+      };
+    } catch (err) {
+      console.error('Error in Cantonese processing:', err);
+      return { text, isProcessed: false };
+    }
+  }, []);
   /**
    * モバイルで 'yue-HK' を 'zh-HK' に変換（SpeechRecognition対策）
    */
@@ -181,7 +199,6 @@ export function useAudioProcessing(
         source.buffer = audioBuffer;
         source.connect(audioContext.destination);
   
-        // 再生終了処理
         source.onended = () => {
           setTtsState({ isPlaying: false });
           if (audioContext) {
@@ -200,7 +217,6 @@ export function useAudioProcessing(
         }
       }
   
-      // クリーンアップ関数
       return () => {
         if (source) {
           try {
@@ -238,10 +254,28 @@ export function useAudioProcessing(
         console.log('Translating to code:', translateCode);
         console.log('Original text:', text);
 
+        // 広東語処理の追加
+        let textToTranslate = text;
+        let isCantonese = false;
+        let originalText;
+
+        if (inputLanguage === 'yue-HK' || inputLanguage === 'zh-HK') {
+          const processed = await processCantonese(text);
+          if (processed.isProcessed) {
+            textToTranslate = processed.text;
+            isCantonese = true;
+            originalText = text;
+          }
+        }
+
         const response = await fetch('/api/translate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, targetLanguage: translateCode }),
+          body: JSON.stringify({ 
+            text: textToTranslate, 
+            targetLanguage: translateCode,
+            isCantonese 
+          }),
         });
 
         if (!response.ok) {
@@ -261,10 +295,11 @@ export function useAudioProcessing(
           timestamp: Date.now(),
           isFinal: true,
           status: 'api',
+          isCantonese,
+          originalText
         };
         addMessage(translationMessage);
 
-        // TTS合成 & 再生
         if (ttsConfig.enabled) {
           await speakText(translation, targetLanguage, ttsConfig.voiceConfig.gender);
         }
@@ -273,9 +308,8 @@ export function useAudioProcessing(
         setError('翻訳または音声合成でエラーが発生しました。');
       }
     },
-    [addMessage, speakText, targetLanguage, ttsConfig.enabled, ttsConfig.voiceConfig.gender]
+    [addMessage, speakText, targetLanguage, ttsConfig.enabled, ttsConfig.voiceConfig.gender, inputLanguage, processCantonese]
   );
-
   // ===================
   // STT（音声入力）結果処理
   // ===================
