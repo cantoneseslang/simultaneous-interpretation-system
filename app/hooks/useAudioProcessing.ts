@@ -250,65 +250,72 @@ export function useAudioProcessing(
   const translateAndSpeak = useCallback(
     async (text: string) => {
       try {
+        const isCantoneseInput = inputLanguage === 'yue-HK' || inputLanguage === 'zh-HK';
         const translateCode = mapToTranslateCode(targetLanguage);
         console.log('Translation process:', {
           inputLanguage,
           targetLanguage,
-          translateCode
+          translateCode,
         });
-   
-        // 1. まず翻訳を実行
-        const response = await fetch('/api/translate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            text, 
-            targetLanguage: translateCode
-          }),
-        });
-   
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Translation API request failed:', errorText);
-          throw new Error('Translation API request failed');
-        }
-   
-        const data = await response.json();
-        let translation = data.translation ?? '';
-        let isCantonese = false;
+  
+        let translation = text; // デフォルトは翻訳せずそのまま使用
+        let isCantonese = isCantoneseInput;
         let originalText = null;
-   
-        // 2. 広東語の場合、翻訳結果を口語変換
-        console.log('Cantonese post-processing:', translation);
-        const processed = await processCantonese(translation);
-        if (processed.isProcessed) {
-          originalText = translation;  // 文語体を保存
-          translation = processed.text;  // 口語体に更新
-          isCantonese = true;
-          console.log('Cantonese converted:', {
-            before: originalText,
-            after: translation
+  
+        if (!isCantoneseInput) {
+          // 入力が広東語でない場合のみ翻訳実行
+          const response = await fetch('/api/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              text,
+              targetLanguage: translateCode,
+            }),
           });
+  
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Translation API request failed:', errorText);
+            throw new Error('Translation API request failed');
+          }
+  
+          const data = await response.json();
+          translation = data.translation ?? '';
         }
-   
+  
+        if (isCantoneseInput || targetLanguage === 'zh-HK') {
+          // 広東語の入力またはターゲット言語が広東語の場合に口語変換
+          console.log('Cantonese post-processing:', translation);
+          const processed = await processCantonese(translation);
+          if (processed.isProcessed) {
+            originalText = translation; // 文語体を保存
+            translation = processed.text; // 口語体に更新
+            isCantonese = true;
+            console.log('Cantonese converted:', {
+              before: originalText,
+              after: translation,
+            });
+          }
+        }
+  
         console.log('Translation result:', {
           original: text,
           translated: translation,
           isCantonese: isCantonese,
-          originalCantonese: originalText
+          originalCantonese: originalText,
         });
- 
+  
         const translationMessage: Message = {
           type: 'translation',
           content: translation,
           timestamp: Date.now(),
           isFinal: true,
           status: 'api',
-          isCantonese,
-          originalText
+          isCantonese: isCantonese ?? false, // Ensure isCantonese is a boolean, defaulting to false if undefined
+          originalText: originalText ?? undefined, // Ensure originalText is either a string or undefined
         };
         addMessage(translationMessage);
- 
+  
         if (ttsConfig.enabled) {
           await speakText(translation, targetLanguage, ttsConfig.voiceConfig.gender);
         }
@@ -317,8 +324,9 @@ export function useAudioProcessing(
         setError('翻訳または音声合成でエラーが発生しました。');
       }
     },
-    [addMessage, speakText, targetLanguage, ttsConfig.enabled, ttsConfig.voiceConfig.gender, processCantonese]
+    [addMessage, speakText, targetLanguage, ttsConfig.enabled, ttsConfig.voiceConfig.gender, processCantonese, inputLanguage]
   );
+  
    
    // ===================
    // STT（音声入力）結果処理
