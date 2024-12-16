@@ -133,10 +133,10 @@ export default function SimultaneousInterpretationSystem() {
       // 東アジア
       case 'ja': case 'ja-JP': return '日本語';
       case 'en': case 'en-US': return '英語';
-      case 'zh': case 'zh-CN': return '中国語（簡体字）';
-      case 'zh-HK': return '広東語（繁体字）';
+      case 'zh': case 'zh-CN': return '中国語';
+      case 'zh-HK': return '広東語';
       case 'yue-HK': return '広東語';
-      case 'zh-TW': return '台湾中国語（繁体字）';
+      case 'zh-TW': return '台湾華語';
       case 'ko': case 'ko-KR': return '韓国語';
       case 'mo': return 'モンゴル語';
 
@@ -362,9 +362,9 @@ export default function SimultaneousInterpretationSystem() {
                   <SelectContent>
                     <SelectItem value="ja">日本語</SelectItem>
                     <SelectItem value="en">英語</SelectItem>
-                    <SelectItem value="zh">中国語（簡体字）</SelectItem>
-                    <SelectItem value="zh-HK">広東語（繁体字）</SelectItem>
-                    <SelectItem value="zh-TW">台湾中国語（繁体字）</SelectItem>
+                    <SelectItem value="zh">中国語</SelectItem>
+                    <SelectItem value="zh-HK">広東語</SelectItem>
+                    <SelectItem value="zh-TW">台湾華語</SelectItem>
                     <SelectItem value="ko">韓国語</SelectItem>
                     <SelectItem value="mo">モンゴル語</SelectItem>
                     <SelectItem value="vi">ベトナム語</SelectItem>
