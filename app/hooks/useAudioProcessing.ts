@@ -279,20 +279,25 @@ export function useAudioProcessing(
         let originalText = null;
    
         // 2. 広東語の場合、翻訳結果を口語変換
-        if (targetLanguage === 'yue-HK' || targetLanguage === 'zh-HK') {
-          console.log('Cantonese post-processing:', translation);
-          const processed = await processCantonese(translation);
-          if (processed.isProcessed) {
-            originalText = translation;  // 文語体を保存
-            translation = processed.text;  // 口語体に更新
-            isCantonese = true;
-            console.log('Cantonese converted:', translation);
-          }
+        console.log('Cantonese post-processing:', translation);
+        const processed = await processCantonese(translation);
+        if (processed.isProcessed) {
+          originalText = translation;  // 文語体を保存
+          translation = processed.text;  // 口語体に更新
+          isCantonese = true;
+          console.log('Cantonese converted:', {
+            before: originalText,
+            after: translation
+          });
         }
    
-        console.log('Translation result:', translation);
-   
-        // メッセージの追加と音声合成
+        console.log('Translation result:', {
+          original: text,
+          translated: translation,
+          isCantonese: isCantonese,
+          originalCantonese: originalText
+        });
+ 
         const translationMessage: Message = {
           type: 'translation',
           content: translation,
@@ -303,7 +308,7 @@ export function useAudioProcessing(
           originalText
         };
         addMessage(translationMessage);
-   
+ 
         if (ttsConfig.enabled) {
           await speakText(translation, targetLanguage, ttsConfig.voiceConfig.gender);
         }
@@ -313,7 +318,7 @@ export function useAudioProcessing(
       }
     },
     [addMessage, speakText, targetLanguage, ttsConfig.enabled, ttsConfig.voiceConfig.gender, processCantonese]
-   );
+  );
    
    // ===================
    // STT（音声入力）結果処理
