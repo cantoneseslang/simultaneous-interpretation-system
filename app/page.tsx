@@ -346,12 +346,12 @@ export default function SimultaneousInterpretationSystem() {
 
             {/* 2行目：出力翻訳言語選択と同時通訳開始ボタン */}
             <div className="flex items-center justify-between gap-2">
-              <Button
-                onClick={toggleListening}
-                variant={isListening ? "destructive" : "default"}
-              >
-                {isListening ? "停止" : "出力翻訳言語"}
-              </Button>
+            <Button
+  onClick={toggleListening}
+  variant={isListening ? "gradientDestructive" : "gradient"}
+>
+  {isListening ? "停止" : "出力翻訳言語"}
+</Button>
 
               <div className="flex items-center gap-2">
                 {/* 言語選択 */}
