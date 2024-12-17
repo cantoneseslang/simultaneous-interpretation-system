@@ -7,6 +7,7 @@ import { Button } from '../components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
 import { Switch } from '../components/ui/switch'
 import { Slider } from '../components/ui/slider'
+import VolumeToggle from '../components/ui/VolumeToggle';
 import {
   Settings2,
   LayoutListIcon as LayoutSideBySide,
@@ -450,19 +451,13 @@ export default function SimultaneousInterpretationSystem() {
                 </Select>
 
                 {/* 音声オン/オフボタン */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setTtsEnabled(!ttsEnabled)}
-                  className={`${ttsEnabled ? 'text-blue-500' : 'text-gray-400'}`}
-                  title={ttsEnabled ? '音声出力ON' : '音声出力OFF'}
-                >
-                  {ttsEnabled ? (
-                    <Volume2 className="h-4 w-4" />
-                  ) : (
-                    <VolumeX className="h-4 w-4" />
-                  )}
-                </Button>
+                {/* 音声オン/オフボタン */}
+<VolumeToggle
+  enabled={ttsEnabled}
+  onChange={setTtsEnabled}
+  className="ml-2"
+/>
+
               </div>
             </div>
 
