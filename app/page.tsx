@@ -237,7 +237,7 @@ export default function SimultaneousInterpretationSystem() {
               width={48}
               height={48}
               priority
-              className="h-24 w-auto hover:opacity-80 transition-opacity"
+              className="h-16 w-auto hover:opacity-80 transition-opacity"
             />
           </Link>
 
