@@ -9,7 +9,7 @@ interface VolumeToggleProps {
 
 const VolumeToggle = ({ enabled, onChange, className = '' }: VolumeToggleProps) => {
   return (
-    <div className={`toggle relative h-12 w-12 ${className}`}>
+    <div className={`toggle relative h-10 w-10 ${className}`}>
       <input
         type="checkbox"
         checked={enabled}
