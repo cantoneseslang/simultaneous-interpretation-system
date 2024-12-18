@@ -228,11 +228,8 @@ export default function SimultaneousInterpretationSystem() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-  <div className="max-w-6xl mx-auto">
-    <div className="flex mb-8">
-      <div className="flex-1 text-center">
-        <div className="flex items-center justify-center gap-4 mb-2">
-          <h1 className="text-3xl font-bold">EarthSync</h1>
+      <div className="max-w-6xl mx-auto">
+        <div className="flex mb-8">
           <Link href="https://lshk-ai-service.studio.site/">
             <Image
               src="/assets/logo/lifesupport-icon-512x512.png"
@@ -243,14 +240,18 @@ export default function SimultaneousInterpretationSystem() {
               className="h-16 w-auto hover:opacity-80 transition-opacity"
             />
           </Link>
+
+          <div className="flex-1 text-center">
+            <h1 className="text-3xl font-bold mb-2">
+              EarthSync
+              <div className="h-1 w-24 bg-blue-500 mx-auto mt-2"></div>
+            </h1>
+            <p className="text-center text-gray-600">
+              ７１の言語と７６億の話者を紡ぐ。<br />
+              貴方の言葉が地球上の人とシンクする。
+            </p>
+          </div>
         </div>
-        <div className="h-1 w-24 bg-blue-500 mx-auto mt-2"></div>
-        <p className="text-center text-gray-600">
-          ７１の言語と７６億の話者を紡ぐ。<br />
-          貴方の言葉が地球上の人とシンクする。
-        </p>
-      </div>
-    </div>
 
         <div className="bg-white shadow-md rounded-lg p-6 mb-6">
           <div className="flex flex-col gap-4">
