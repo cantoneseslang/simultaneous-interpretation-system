@@ -234,8 +234,8 @@ export default function SimultaneousInterpretationSystem() {
             <Image
               src="/assets/logo/lifesupport-icon-512x512.png"
               alt="Life Support Icon"
-              width={64}
-              height={64}
+              width={48}
+              height={48}
               priority
               className="h-24 w-auto hover:opacity-80 transition-opacity"
             />
