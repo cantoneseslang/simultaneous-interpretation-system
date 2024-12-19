@@ -246,9 +246,9 @@ export default function SimultaneousInterpretationSystem() {
               EarthSync
               <div className="h-1 w-24 bg-blue-500 mx-auto mt-2"></div>
             </h1>
-            <p className="text-center text-gray-600">
+            <p className="text-gray-600 text-sm">
             ７１言語、７６億人の言葉の壁を取り払う。<br />
-            ”声””テキスト””思い”が地球上の人と自動でシンクする。
+            「声、テキスト、思い」が自動でシンクする。
             </p>
           </div>
         </div>
@@ -573,7 +573,7 @@ export default function SimultaneousInterpretationSystem() {
                 </div>
               ))}
               {translationMessages.length === 0 && (
-                <p className="text-gray-600">まだ翻訳結果はありません。音声認識が開始されると翻訳結果が表示されます。</p>
+                <p className="text-gray-600">まだ翻訳結果はありません。音声を入れると自動でこちらに翻訳結果が表示されます。</p>
               )}
               <div ref={translatedMessagesEndRef} />
             </div>
