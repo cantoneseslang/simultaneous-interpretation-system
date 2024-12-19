@@ -248,7 +248,7 @@ export default function SimultaneousInterpretationSystem() {
             </h1>
             <p className="text-center text-gray-600">
               ７１の言語と７６億の話者を紡ぐ。<br />
-              貴方の言葉が地球上の人とシンクする。
+              貴方の”声”と”文字”が地球上の人と言葉の壁を乗り越え自動でシンクする。
             </p>
           </div>
         </div>
