@@ -258,7 +258,7 @@ export default function SimultaneousInterpretationSystem() {
             {/* 1行目：入力言語切替ボタンと国旗ボタン */}
             <div className="flex items-center gap-4">
               <Button variant="secondary" className="pointer-events-none">
-                入力言語切替
+                入力切替
               </Button>
 
               <div className="flex gap-2">
@@ -351,7 +351,7 @@ export default function SimultaneousInterpretationSystem() {
   onClick={toggleListening}
   variant={isListening ? "gradientDestructive" : "gradient"}
 >
-  {isListening ? "停止" : "出力翻訳言語"}
+  {isListening ? "停止" : "出力言語"}
 </Button>
 
               <div className="flex items-center gap-2">
