@@ -247,8 +247,8 @@ export default function SimultaneousInterpretationSystem() {
               <div className="h-1 w-24 bg-blue-500 mx-auto mt-2"></div>
             </h1>
             <p className="text-center text-gray-600">
-            ７１の言語と７６億の話者と言葉の壁を取り払う。<br />
-              人間の”声”と”文字”と”意思”が地球上の人と自動でシンクする。
+            ７１言語、７６億人の言葉の壁を取り払う。<br />
+            ”声””テキスト””思い”が地球上の人と自動でシンクする。
             </p>
           </div>
         </div>
@@ -589,14 +589,14 @@ export default function SimultaneousInterpretationSystem() {
                   </div>
                 ))}
                 {transcriptMessages.length === 0 && (
-                  <p className="text-gray-600">
-                  ❶「入力言語」を選択
-                  ❷「出力言語」を選択
-                  ❸「声の性別」を選択
-                  ❹「スピーカーon,off」を選択
-                  ❺「表示オプション」を選択
-                  ❺「出力言語」押してスタート
-                  まだメッセージはありません。</p>
+                  <p className="text-gray-600">＜始め方＞</span>                  
+                  ❶「入力言語」を選択<br />
+                  ❷「出力言語」を選択<br />
+                  ❸「声の性別」を選択<br />
+                  ❹「スピーカーon,off」を選択<br />
+                  ❺「表示オプション」を選択<br />
+                  ❺「出力言語」押してスタート<br />
+                  まだメッセージはありません。
                 )}
                 <div ref={japaneseMessagesEndRef} />
               </div>
