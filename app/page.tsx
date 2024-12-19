@@ -258,7 +258,7 @@ export default function SimultaneousInterpretationSystem() {
             {/* 1行目：入力言語切替ボタンと国旗ボタン */}
             <div className="flex items-center gap-4">
               <Button variant="secondary" className="pointer-events-none">
-                入力切替
+                入力言語
               </Button>
 
               <div className="flex gap-2">
