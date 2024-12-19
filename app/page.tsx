@@ -573,7 +573,7 @@ export default function SimultaneousInterpretationSystem() {
                 </div>
               ))}
               {translationMessages.length === 0 && (
-                <p className="text-gray-600">まだ翻訳結果はありません。音声を入れると自動でこちらに翻訳結果が表示されます。</p>
+                <p className="text-gray-600　text-sm">まだ翻訳結果はありません。音声を入れると自動でこちらに翻訳結果が表示されます。</p>
               )}
               <div ref={translatedMessagesEndRef} />
             </div>
@@ -594,9 +594,9 @@ export default function SimultaneousInterpretationSystem() {
       ❶「入力言語」を選択<br />
       ❷「出力言語」を選択<br />
       ❸「声の性別」を選択<br />
-      ❹「スピーカーon,off」を選択<br />
-      ❺「表示オプション」を選択<br />
-      ❻「出力言語」押してスタート<br />
+      ❹「スピーカーon,off」<br />を選択<br />
+      ❺「表示オプション」<br />を選択<br />
+      ❻「出力言語」<br />を押してスタート<br />
       まだメッセージはありません。
     </p>
   </div>
