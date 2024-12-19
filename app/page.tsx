@@ -573,7 +573,7 @@ export default function SimultaneousInterpretationSystem() {
                 </div>
               ))}
               {translationMessages.length === 0 && (
-                <p className="text-gray-600　text-sm">まだ翻訳結果はありません。音声を入れると自動でこちらに翻訳結果が表示されます。</p>
+                <p className="text-gray-600　">まだ翻訳結果はありません。音声を入れると自動でこちらに翻訳結果が表示されます。</p>
               )}
               <div ref={translatedMessagesEndRef} />
             </div>
@@ -589,17 +589,17 @@ export default function SimultaneousInterpretationSystem() {
                   </div>
                 ))}
                 {transcriptMessages.length === 0 && (
-  <div className="text-gray-600 text-sm">
-    <p>＜始め方＞<br />
-      ❶「入力言語」を選択<br />
-      ❷「出力言語」を選択<br />
-      ❸「声の性別」を選択<br />
-      ❹「スピーカーon,off」<br />を選択<br />
-      ❺「表示オプション」<br />を選択<br />
-      ❻「出力言語」<br />を押してスタート<br />
-      まだメッセージはありません。
-    </p>
-  </div>
+ <div className="text-gray-600 text-sm">
+   <p>＜始め方＞<br />
+     ❶「入力言語」を選択<br />
+     ❷「出力言語」を選択<br />
+     ❸「声の性別」を選択<br />
+     ❹「音声on,off」<br />を選択<br />
+     ❺「表示オプション」<br />を選択<br />
+     ❻<span className="text-blue-500 font-bold">「出力言語」</span><br />を押してスタート<br />
+     まだメッセージはありません。
+   </p>
+ </div>
 )}
                 <div ref={japaneseMessagesEndRef} />
               </div>
@@ -622,7 +622,7 @@ export default function SimultaneousInterpretationSystem() {
                     </div>
                   ))}
                   {translationMessages.length === 0 && (
-                    <p className={`text-gray-600 ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}>
+                    <p className={`text-gray-600　text-sm ${layoutMode === 'inverse' ? 'transform rotate-180' : ''}`}>
                       「出力翻訳言語」ボタンを押すと音声認識結果が表示されます。まだ翻訳結果はありません。
                     </p>
                   )}
