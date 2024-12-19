@@ -589,7 +589,14 @@ export default function SimultaneousInterpretationSystem() {
                   </div>
                 ))}
                 {transcriptMessages.length === 0 && (
-                  <p className="text-gray-600">「出力翻訳言語」ボタンを押すと音声認識結果が表示されます。まだメッセージはありません。</p>
+                  <p className="text-gray-600">
+                  ❶「入力言語」を選択
+                  ❷「出力言語」を選択
+                  ❸「声の性別」を選択
+                  ❹「スピーカーon,off」を選択
+                  ❺「表示オプション」を選択
+                  ❺「出力言語」押してスタート
+                  まだメッセージはありません。</p>
                 )}
                 <div ref={japaneseMessagesEndRef} />
               </div>
