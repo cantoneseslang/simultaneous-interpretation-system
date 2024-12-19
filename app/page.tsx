@@ -589,7 +589,7 @@ export default function SimultaneousInterpretationSystem() {
                   </div>
                 ))}
                 {transcriptMessages.length === 0 && (
-  <div className="text-gray-600">
+  <div className="text-gray-600 text-sm">
     <p>＜始め方＞<br />
       ❶「入力言語」を選択<br />
       ❷「出力言語」を選択<br />
