@@ -252,30 +252,24 @@ export function useAudioProcessing(
       try {
         const isCantoneseInput = inputLanguage === 'yue-HK' || inputLanguage === 'zh-HK';
         const translateCode = mapToTranslateCode(targetLanguage);
-        console.log('Translation process:', {
-          inputLanguage,
-          targetLanguage,
-          translateCode,
-        });
-  
-        let translation = text; // デフォルトは翻訳せずそのまま使用
+        
+        let translation = text;
         let isCantonese = isCantoneseInput;
-        let originalText = null;
+        let originalText = '';  // 空文字列で初期化
   
-        if (!isCantoneseInput) {
-          // 入力が広東語でない場合のみ翻訳実行
+        // 入力言語と目標言語が異なる場合は必ず翻訳を実行
+        if (mapToTranslateCode(inputLanguage) !== translateCode) {
           const response = await fetch('/api/translate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               text,
+              sourceLanguage: mapToTranslateCode(inputLanguage),
               targetLanguage: translateCode,
             }),
           });
   
           if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Translation API request failed:', errorText);
             throw new Error('Translation API request failed');
           }
   
@@ -283,38 +277,29 @@ export function useAudioProcessing(
           translation = data.translation ?? '';
         }
   
-        if (isCantoneseInput || targetLanguage === 'zh-HK') {
-          // 広東語の入力またはターゲット言語が広東語の場合に口語変換
+        // 広東語処理は翻訳後に必要な場合のみ実行
+        if (targetLanguage === 'zh-HK' || targetLanguage === 'yue-HK') {
           console.log('Cantonese post-processing:', translation);
           const processed = await processCantonese(translation);
           if (processed.isProcessed) {
-            originalText = translation; // 文語体を保存
-            translation = processed.text; // 口語体に更新
+            originalText = translation;
+            translation = processed.text;
             isCantonese = true;
-            console.log('Cantonese converted:', {
-              before: originalText,
-              after: translation,
-            });
           }
         }
   
-        console.log('Translation result:', {
-          original: text,
-          translated: translation,
-          isCantonese: isCantonese,
-          originalCantonese: originalText,
-        });
-  
-        const translationMessage: Message = {
+        // メッセージの追加と音声合成
+        const message: Message = {
           type: 'translation',
           content: translation,
           timestamp: Date.now(),
           isFinal: true,
           status: 'api',
-          isCantonese: isCantonese ?? false, // Ensure isCantonese is a boolean, defaulting to false if undefined
-          originalText: originalText ?? undefined, // Ensure originalText is either a string or undefined
+          isCantonese,
+          ...(originalText ? { originalText } : {})  // originalTextが空文字列でない場合のみ含める
         };
-        addMessage(translationMessage);
+        
+        addMessage(message);
   
         if (ttsConfig.enabled) {
           await speakText(translation, targetLanguage, ttsConfig.voiceConfig.gender);
